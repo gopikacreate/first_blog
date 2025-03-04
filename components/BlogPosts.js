@@ -1,0 +1,113 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { db } from "../lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
+import { useRouter } from "next/navigation";
+import LoginButton from "./LoginButton";
+import AdminLogin from "./loginPage";
+
+const BlogPosts = () => {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const postsPerPage = 3;
+  const router = useRouter();
+
+  useEffect(() => {
+    async function fetchPosts() {
+      const querySnapshot = await getDocs(collection(db, "posts"));
+      const postData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setPosts(postData);
+      setLoading(false);
+    }
+    fetchPosts();
+  }, []);
+
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
+
+  return (
+    <div className="blog-container">
+      {/* Hidden Admin Trigger */}
+      <div
+        className="hidden-admin-trigger"
+        onClick={() => {
+          console.log("Admin login modal triggered");
+          setShowLoginModal(true);
+        }}
+      ></div>
+
+      {/* Admin Login Modal */}
+      {showLoginModal && (
+        <div
+          className="admin-login-overlay"
+          onClick={() => setShowLoginModal(false)}
+        >
+          <div
+            className="admin-login-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p>Admin Login</p>
+            <AdminLogin />
+            <button onClick={() => setShowLoginModal(false)}>Close</button>
+          </div>
+        </div>
+      )}
+
+      <h1 className="main-heading">My Awesome Blog</h1>
+      {loading ? (
+        <div className="spinner"></div>
+      ) : (
+        <>
+          {currentPosts.map((post) => (
+            <div key={post.id} className="blog-post">
+              <p className="post-date">
+                {post.date?.seconds
+                  ? new Date(post.date.seconds * 1000).toDateString()
+                  : "Date not available"}
+              </p>
+              <h2 className="post-title">{post.title}</h2>
+              <p className="post-tagline">{post.tagline}</p>
+              {post.imageurl && (
+                <img
+                  src={post.imageurl}
+                  alt={post.title}
+                  className="post-image"
+                />
+              )}
+              <p className="post-content">{post.content}</p>
+            </div>
+          ))}
+          {!loading && posts.length > postsPerPage && (
+            <div className="pagination">
+              {currentPage > 1 && (
+                <button
+                  className="pagination-btn"
+                  onClick={() => setCurrentPage((prev) => prev - 1)}
+                >
+                  ⬅ Previous
+                </button>
+              )}
+              {indexOfLastPost < posts.length && (
+                <button
+                  className="pagination-btn"
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                >
+                  Next ➡
+                </button>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+export default BlogPosts;
