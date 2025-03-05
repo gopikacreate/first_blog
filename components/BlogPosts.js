@@ -14,7 +14,7 @@ const BlogPosts = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const postsPerPage = 3;
   const router = useRouter();
-const [open,setOpen]=useState(false)
+
   useEffect(() => {
     async function fetchPosts() {
       const querySnapshot = await getDocs(collection(db, "posts"));
@@ -38,7 +38,7 @@ const [open,setOpen]=useState(false)
       <div
         className="hidden-admin-trigger"
         onClick={() => {
-          console.log("Admin login modal triggered");
+         
           setShowLoginModal(true);
         }}
       ></div>

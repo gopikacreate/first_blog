@@ -1,12 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { auth } from "../../lib/firebase";
 import { logOut } from "../../lib/auth";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { addPost, editPost, deletePost, uploadImage } from "../../lib/firebaseCrud";
-import { collection, getDocs } from "firebase/firestore";
+import {
+  addPost,
+  editPost,
+  deletePost,
+  uploadImage,
+} from "../../lib/firebaseCrud";
+import { collection, getDocs, Timestamp } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 
 export default function AdminPage() {
@@ -17,13 +22,17 @@ export default function AdminPage() {
     title: "",
     tagline: "",
     content: "",
-    image:null,
+    image: null,
   });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [postToDelete, setPostToDelete] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [postToEdit, setPostToEdit] = useState(null);
   const postsPerPage = 5;
+  const [open, setOpen] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const fileInputRef = useRef(null); // Create a ref for the file input
   const router = useRouter();
 
   useEffect(() => {
@@ -53,19 +62,36 @@ export default function AdminPage() {
   //   if (!file) return null;
   //   return await uploadImage(file);
   // };
+  const handleRemoveImage = () => {
+    setNewPost({ ...newPost, image: null });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // Reset file input field
+    }
+  };
+  const handleClearForm = () => {
+    setNewPost({ title: "", tagline: "", content: "", image: null });
+    setErrors({});
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // Reset file input field
+    }
+  };
   const handleImageUpload = async (file) => {
     if (!file) return null;
-  
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", "simpleblog"); // Replace with your actual upload preset
-  
+
     try {
-      const response = await fetch("https://api.cloudinary.com/v1_1/defzpkljn/image/upload", {
-        method: "POST",
-        body: formData,
-      });
-  
+      const response = await fetch(
+        "https://api.cloudinary.com/v1_1/defzpkljn/image/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
       const data = await response.json();
       return data.secure_url; // URL of the uploaded image
     } catch (error) {
@@ -73,56 +99,51 @@ export default function AdminPage() {
       return null;
     }
   };
-  
+
   const handleAddPost = async () => {
-    if (!newPost.title || !newPost.tagline || !newPost.content || !newPost.image) {
-      alert("Please fill all fields");
+    setIsLoading(true);
+    setErrors({}); // Reset validation errors
+
+    let validationErrors = {};
+
+    // Validate required fields
+    if (!newPost.title) validationErrors.title = "Title is required";
+    if (!newPost.tagline) validationErrors.tagline = "Tagline is required";
+    if (!newPost.content) validationErrors.content = "Content is required";
+
+    // If errors exist, update state and stop function execution
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setIsLoading(false);
       return;
     }
-  
-    const imageUrl = await handleImageUpload(newPost.image);
-    if (!imageUrl) {
-      alert("Image upload failed");
-      return;
+
+    let imageUrl = null;
+    if (newPost.image) {
+      imageUrl = await handleImageUpload(newPost.image);
     }
-  
-    const addedPost = await addPost({
-      title: newPost.title,
-      tagline: newPost.tagline,
-      content: newPost.content,
-      image: imageUrl, // Use Cloudinary URL
-      date: new Date(),
-    });
-  
-    if (addedPost) {
-      setPosts([addedPost, ...posts]);
-      setNewPost({ title: "", tagline: "", content: "", image: null });
+
+    try {
+      const addedPost = await addPost({
+        title: newPost.title,
+        tagline: newPost.tagline,
+        content: newPost.content,
+        image: imageUrl, // Image is optional
+        date: Timestamp.fromDate(new Date()),
+      });
+
+      if (addedPost) {
+        setPosts([addedPost, ...posts]);
+        setNewPost({ title: "", tagline: "", content: "", image: null });
+        setOpen(false);
+      }
+    } catch (error) {
+      console.error("Error adding post:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
-  
 
-  // const handleAddPost = async () => {
-  //   if (!newPost.title || !newPost.tagline || !newPost.content || !newPost.image) {
-  //     alert("Please fill all fields");
-  //     return;
-  //   }
-  //   const imageUrl = await handleImageUpload(newPost.image);
-  //   if (!imageUrl) {
-  //     alert("Image upload failed");
-  //     return;
-  //   }
-  //   const addedPost = await addPost({
-  //     title: newPost.title,
-  //     tagline: newPost.tagline,
-  //     content: newPost.content,
-  //     image: newPost.image,
-  //     date: new Date(),
-  //   });
-  //   if (addedPost) {
-  //     setPosts([addedPost, ...posts]);
-  //     setNewPost({ title: "", tagline: "", content: "", image: null });
-  //   }
-  // };
   const openEditModal = (post) => {
     setPostToEdit(post);
     setShowEditModal(true);
@@ -134,24 +155,25 @@ export default function AdminPage() {
       if (typeof postToEdit.image !== "string") {
         imageUrl = await handleImageUpload(postToEdit.image);
       }
-  
+
       const updatedPost = await editPost(postToEdit.id, {
         title: postToEdit.title,
         tagline: postToEdit.tagline,
         content: postToEdit.content,
         image: imageUrl, // Use Cloudinary URL
-        date: new Date(),
+        date: Timestamp.fromDate(new Date()),
       });
-  
+
       if (updatedPost) {
-        setPosts(posts.map((post) => (post.id === postToEdit.id ? updatedPost : post)));
+        setPosts(
+          posts.map((post) => (post.id === postToEdit.id ? updatedPost : post))
+        );
       }
-  
+
       setShowEditModal(false);
       setPostToEdit(null);
     }
   };
-  
 
   // const handleEditPost = async () => {
   //   if (postToEdit) {
@@ -205,6 +227,10 @@ export default function AdminPage() {
     setShowDeleteModal(true);
   };
 
+  const openPostCreate = () => {
+    setOpen(true);
+  };
+
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
   const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
@@ -212,71 +238,244 @@ export default function AdminPage() {
   return (
     <div className="admin-container">
       <h1 className="main-heading">Admin Panel</h1>
- {/* Edit Modal */}
- {showEditModal && postToEdit && (
+      {/* Edit Modal */}
+      {showEditModal && postToEdit && (
         <div className="modal">
           <div className="modal-content">
             <h2>Edit Post</h2>
-            <input type="text" value={postToEdit.title} onChange={(e) => setPostToEdit({ ...postToEdit, title: e.target.value })} />
-            <input type="text" value={postToEdit.tagline} onChange={(e) => setPostToEdit({ ...postToEdit, tagline: e.target.value })} />
-            <textarea value={postToEdit.content} onChange={(e) => setPostToEdit({ ...postToEdit, content: e.target.value })} />
-            <input type="file" onChange={(e) => setPostToEdit({ ...postToEdit, image: e.target.files[0] })} />
+            <input
+              type="text"
+              value={postToEdit.title}
+              onChange={(e) =>
+                setPostToEdit({ ...postToEdit, title: e.target.value })
+              }
+            />
+            <input
+              type="text"
+              value={postToEdit.tagline}
+              onChange={(e) =>
+                setPostToEdit({ ...postToEdit, tagline: e.target.value })
+              }
+            />
+            <textarea
+              value={postToEdit.content}
+              onChange={(e) =>
+                setPostToEdit({ ...postToEdit, content: e.target.value })
+              }
+            />
+            <input
+              type="file"
+              onChange={(e) =>
+                setPostToEdit({ ...postToEdit, image: e.target.files[0] })
+              }
+            />
             <button onClick={handleEditPost}>Save Changes</button>
             <button onClick={() => setShowEditModal(false)}>Cancel</button>
           </div>
         </div>
       )}
       {/* Add New Post Form */}
-      <div className="new-post-form">
-        <h2 className="form-heading">Create New Post</h2>
-        <input type="text" placeholder="Enter post title" value={newPost.title} onChange={(e) => setNewPost({ ...newPost, title: e.target.value })} />
-        <input type="text" placeholder="Enter tagline" value={newPost.tagline} onChange={(e) => setNewPost({ ...newPost, tagline: e.target.value })} />
-        <textarea placeholder="Write your post content..." value={newPost.content} onChange={(e) => setNewPost({ ...newPost, content: e.target.value })} />
-        <input type="file" onChange={(e) => setNewPost({ ...newPost, image: e.target.files[0] })} />
-        <button onClick={handleAddPost}>Add New Post</button>
-      </div>
+      {open ? (
+        <div className="new-post-form">
+          <h2 className="form-heading">Create New Post</h2>
+
+          <input
+            type="text"
+            placeholder="Enter post title"
+            value={newPost.title}
+            onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
+          />
+          {errors.title && <p className="error">{errors.title}</p>}
+
+          <input
+            type="text"
+            placeholder="Enter tagline"
+            value={newPost.tagline}
+            onChange={(e) =>
+              setNewPost({ ...newPost, tagline: e.target.value })
+            }
+          />
+          {errors.tagline && <p className="error">{errors.tagline}</p>}
+
+          <textarea
+            placeholder="Write your post content..."
+            value={newPost.content}
+            onChange={(e) =>
+              setNewPost({ ...newPost, content: e.target.value })
+            }
+          />
+          {errors.content && <p className="error">{errors.content}</p>}
+
+          <input
+            ref={fileInputRef} // Attach ref to the file input
+            type="file"
+            onChange={(e) =>
+              setNewPost({ ...newPost, image: e.target.files[0] })
+            }
+          />
+
+          {/* Show "Remove Image" button if an image is uploaded */}
+          {newPost.image && (
+            <button
+              style={{
+                marginRight: "20px",
+                marginLeft: "20px",
+                marginTop: "10px",
+              }}
+              className="delete-btn"
+              onClick={handleRemoveImage}
+            >
+              Remove Image
+            </button>
+          )}
+
+          <button
+            disabled={isLoading}
+            style={{ marginTop: "20px" }}
+            className="delete-btn"
+            onClick={handleAddPost}
+          >
+            {isLoading ? <span className="loader"></span> : "Add New Post"}
+          </button>
+
+          {/* Clear Form Button */}
+          <button
+            style={{
+              margin: "20px",
+            }}
+            className="delete-btn"
+            onClick={handleClearForm}
+          >
+            Clear Form
+          </button>
+        </div>
+      ) : (
+        ""
+      )}
 
       <div className="posts-list">
         {loading ? (
           <p>Loading posts...</p>
         ) : (
-          <table className="post-table">
-            <thead>
-              <tr>
-                <th>Image</th>
-                <th>Title</th>
-                <th>Tagline</th>
-                <th>Date</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentPosts.map((post) => (
-                <tr key={post.id} className="post-item">
-                  <td><img src={post.image} alt="Post" className="post-image" /></td>
-                  <td>{post.title}</td>
-                  <td>{post.tagline}</td>
-                  <td>{post.date?.seconds ? new Date(post.date.seconds * 1000).toDateString() : "Date not available"}</td>
-                  <td>
-                  <button className="edit-btn" onClick={() => openEditModal(post)}>Edit</button>
-
-                    <button className="delete-btn" onClick={() => openDeleteModal(post.id)}>Delete</button>
-                  </td>
+          <>
+            {open ? (
+              <button
+                style={{
+                  marginBottom: "20px",
+                }}
+                className="delete-btn"
+                onClick={() => setOpen(false)}
+              >
+                Hide Form
+              </button>
+            ) : (
+              <button
+                style={{
+                  marginBottom: "20px",
+                }}
+                className="delete-btn"
+                onClick={() => openPostCreate(true)}
+              >
+                Create New Post
+              </button>
+            )}
+            {/* table */}
+            <div style={{
+               overflowX:"auto",
+               width:"100%"
+            }}>
+                <table >
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Title</th>
+                  <th>Tagline</th>
+                  <th>Content</th>
+                  <th>Date</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {currentPosts.map((post) => (
+                  <tr key={post.id}>
+                    <td>
+                      {post.image ? (
+                        <img
+                          src={post.image}
+                          alt="Post"
+                          className="post-image"
+                        />
+                      ) : (
+                        <div className="no-image">No Image</div>
+                      )}
+                    </td>
+                    <td>{post.title}</td>
+                    <td>{post.tagline}</td>
+                    <td>{post.content}</td>
+                    <td>
+                      {post.date?.seconds
+                        ? new Date(post.date.seconds * 1000).toDateString()
+                        : "Date not available"}
+                    </td>
+                    <td>
+                      <button
+                        className="edit-btn"
+                        onClick={() => openEditModal(post)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="edit-btn"
+                        onClick={() => openDeleteModal(post.id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            </div>
+          
+          </>
         )}
       </div>
-{console.log("showDeleteModal",showDeleteModal)}
+
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="modal">
           <div className="modal-content">
             <p>Are you sure you want to delete this post?</p>
-            <button onClick={handleDeletePost} className="confirm-btn">Yes, Delete</button>
-            <button onClick={() => setShowDeleteModal(false)} className="cancel-btn">Cancel</button>
+            <button onClick={handleDeletePost} className="confirm-btn">
+              Yes, Delete
+            </button>
+            <button
+              onClick={() => setShowDeleteModal(false)}
+              className="cancel-btn"
+            >
+              Cancel
+            </button>
           </div>
+        </div>
+      )}
+      {!loading && posts.length > postsPerPage && (
+        <div className="pagination">
+          {currentPage > 1 && (
+            <button
+              className="pagination-btn"
+              onClick={() => setCurrentPage((prev) => prev - 1)}
+            >
+              ⬅ Previous
+            </button>
+          )}
+          {indexOfLastPost < posts.length && (
+            <button
+              className="pagination-btn"
+              onClick={() => setCurrentPage((prev) => prev + 1)}
+            >
+              Next ➡
+            </button>
+          )}
         </div>
       )}
     </div>
