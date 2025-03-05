@@ -174,7 +174,7 @@
 .admin-container {
   text-align: center;
   padding: 20px;
-  background-color: #e1abab;
+  background-color: #efefef;
   min-height: 100vh;
 }
 
@@ -299,7 +299,7 @@
   max-width: 900px;
   margin: 50px auto;
   padding: 20px;
-  background: #fff;
+  background: #d77c7c;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
