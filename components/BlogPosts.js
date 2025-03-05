@@ -60,7 +60,8 @@ const BlogPosts = () => {
         </div>
       )}
 
-      <h1 className="main-heading">My Awesome Blog</h1>
+      <h1 className="main-heading">Simply Scribbled</h1>
+      <h2 className="post-date">Words, memories, and everything in between.</h2>
       {loading ? (
         <div className="spinner"></div>
       ) : (
