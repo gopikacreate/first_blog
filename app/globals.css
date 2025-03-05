@@ -572,6 +572,33 @@ th {
   min-width: 600px; /* Ensures the table doesn't shrink too much */
   white-space: nowrap; /* Prevents text from breaking */
 }
+.table-container {
+  width: 100%;
+  overflow-x: auto; /* Enables horizontal scrolling */
+  white-space: nowrap; /* Prevents text from wrapping */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #c41e1e #611818; /* Scrollbar colors for Firefox */
+}
+
+/* For WebKit Browsers (Chrome, Safari) */
+.table-container::-webkit-scrollbar {
+  height: 8px; /* Scrollbar height */
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Track color */
+  border-radius: 10px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #c0c0c0; /* Scrollbar color */
+  border-radius: 10px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0; /* Scrollbar color on hover */
+}
+
 
 .error{
   color: #c2001b;

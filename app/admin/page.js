@@ -381,63 +381,59 @@ export default function AdminPage() {
               </button>
             )}
             {/* table */}
-            <div style={{
-               overflowX:"auto",
-               width:"100%"
-            }}>
-                <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Image</th>
-                  <th>Title</th>
-                  <th>Tagline</th>
-                  <th>Content</th>
-                  <th>Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentPosts.map((post) => (
-                  <tr key={post.id}>
-                    <td>
-                      {post.image ? (
-                        <img
-                          src={post.image}
-                          alt="Post"
-                          className="post-image"
-                        />
-                      ) : (
-                        <div className="no-image">No Image</div>
-                      )}
-                    </td>
-                    <td>{post.title}</td>
-                    <td>{post.tagline}</td>
-                    <td>{post.content}</td>
-                    <td>
-                      {post.date?.seconds
-                        ? new Date(post.date.seconds * 1000).toDateString()
-                        : "Date not available"}
-                    </td>
-                    <td>
-                      <button
-                        className="edit-btn"
-                        onClick={() => openEditModal(post)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="edit-btn"
-                        onClick={() => openDeleteModal(post.id)}
-                      >
-                        Delete
-                      </button>
-                    </td>
+            <div className="table-container">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Image</th>
+                    <th>Title</th>
+                    <th>Tagline</th>
+                    <th>Content</th>
+                    <th>Date</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {currentPosts.map((post) => (
+                    <tr key={post.id}>
+                      <td>
+                        {post.image ? (
+                          <img
+                            src={post.image}
+                            alt="Post"
+                            className="post-image"
+                          />
+                        ) : (
+                          <div className="no-image">No Image</div>
+                        )}
+                      </td>
+                      <td>{post.title}</td>
+                      <td>{post.tagline}</td>
+                      <td>{post.content}</td>
+                      <td>
+                        {post.date?.seconds
+                          ? new Date(post.date.seconds * 1000).toDateString()
+                          : "Date not available"}
+                      </td>
+                      <td>
+                        <button
+                          className="edit-btn"
+                          onClick={() => openEditModal(post)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="edit-btn"
+                          onClick={() => openDeleteModal(post.id)}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          
           </>
         )}
       </div>
@@ -466,7 +462,7 @@ export default function AdminPage() {
               className="pagination-btn"
               onClick={() => setCurrentPage((prev) => prev - 1)}
             >
-               <FaArrowLeft />  Previous
+              <FaArrowLeft /> Previous
             </button>
           )}
           {indexOfLastPost < posts.length && (
@@ -474,7 +470,7 @@ export default function AdminPage() {
               className="pagination-btn"
               onClick={() => setCurrentPage((prev) => prev + 1)}
             >
-              Next <FaArrowRight  />
+              Next <FaArrowRight />
             </button>
           )}
         </div>
