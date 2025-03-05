@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { db } from "../lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import LoginButton from "./LoginButton";
 import AdminLogin from "./loginPage";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
@@ -79,7 +78,7 @@ const BlogPosts = () => {
                 <img
                   src={post.image}
                   alt={post.title}
-                  className="post-image"
+                  className="blog-image"
                 />
               )}
               <p className="post-content">{post.content}</p>

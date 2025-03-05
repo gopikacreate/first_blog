@@ -32,10 +32,11 @@ export default function AdminPage() {
   const postsPerPage = 5;
   const [open, setOpen] = useState(false);
   const [errors, setErrors] = useState({});
+  const [editErrors, setEditErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef(null); // Create a ref for the file input
   const router = useRouter();
-
+console.log("postToEdit",postToEdit)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user || user.email !== "gopikagopakumar0799@gmail.com") {
@@ -69,6 +70,18 @@ export default function AdminPage() {
       fileInputRef.current.value = ""; // Reset file input field
     }
   };
+  const handleEditCancel = () => {
+    setShowEditModal(false)
+    setEditErrors({});
+
+  };
+  const handleRemoveImageEdit = () => {
+    setPostToEdit({ ...postToEdit, image: null });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // Reset file input field
+    }
+  };
+  
   const handleClearForm = () => {
     setNewPost({ title: "", tagline: "", content: "", image: null });
     setErrors({});
@@ -77,6 +90,13 @@ export default function AdminPage() {
       fileInputRef.current.value = ""; // Reset file input field
     }
   };
+
+  const handleFormHide = () => {
+    handleClearForm()
+    setOpen(false)
+  };
+
+  
   const handleImageUpload = async (file) => {
     if (!file) return null;
 
@@ -151,6 +171,18 @@ export default function AdminPage() {
   };
 
   const handleEditPost = async () => {
+    setIsLoading(true);
+    setEditErrors({});
+    let validationErrors = {};
+    // Validate required fields
+    if (!postToEdit.title) validationErrors.title = "Title is required";
+    if (!postToEdit.tagline) validationErrors.tagline = "Tagline is required";
+    if (!postToEdit.content) validationErrors.content = "Content is required";
+    if (Object.keys(validationErrors).length > 0) {
+      setEditErrors(validationErrors);
+      setIsLoading(false);
+      return;
+    }
     if (postToEdit) {
       let imageUrl = postToEdit.image;
       if (typeof postToEdit.image !== "string") {
@@ -170,48 +202,13 @@ export default function AdminPage() {
           posts.map((post) => (post.id === postToEdit.id ? updatedPost : post))
         );
       }
-
+      setIsLoading(false);
       setShowEditModal(false);
       setPostToEdit(null);
     }
   };
 
-  // const handleEditPost = async () => {
-  //   if (postToEdit) {
-  //     let imageUrl = postToEdit.image;
-  //     if (typeof postToEdit.image !== "string") {
-  //       imageUrl = await handleImageUpload(postToEdit.image);
-  //     }
-  //     const updatedPost = await editPost(postToEdit.id, {
-  //       title: postToEdit.title,
-  //       tagline: postToEdit.tagline,
-  //       content: postToEdit.content,
-  //       image: imageUrl,
-  //       date: new Date(),
-  //     });
-  //     if (updatedPost) {
-  //       setPosts(posts.map((post) => (post.id === postToEdit.id ? updatedPost : post)));
-  //     }
-  //     setShowEditModal(false);
-  //     setPostToEdit(null);
-  //   }
-  // };
-
-  // const handleEditPost = async () => {
-  //   if (postToEdit) {
-  //     const updatedPost = await editPost(postToEdit.id, {
-  //       title: postToEdit.title,
-  //       tagline: postToEdit.tagline,
-  //       content: postToEdit.content,
-  //       image: postToEdit.image,
-  //     });
-  //     if (updatedPost) {
-  //       setPosts(posts.map((post) => (post.id === postToEdit.id ? updatedPost : post)));
-  //     }
-  //     setShowEditModal(false);
-  //     setPostToEdit(null);
-  //   }
-  // };
+  
   const handleDeletePost = async () => {
     if (postToDelete) {
       const success = await deletePost(postToDelete);
@@ -243,14 +240,18 @@ export default function AdminPage() {
       {showEditModal && postToEdit && (
         <div className="modal">
           <div className="modal-content">
-            <h2>Edit Post</h2>
+            <h2 className="form-heading">Edit Post</h2>
+            <label>Enter post title</label>
             <input
               type="text"
+               placeholder="Enter post title"
               value={postToEdit.title}
               onChange={(e) =>
                 setPostToEdit({ ...postToEdit, title: e.target.value })
               }
             />
+               {editErrors.title && <p className="error">{editErrors.title}</p>}
+            <label>Enter tagline</label>
             <input
               type="text"
               value={postToEdit.tagline}
@@ -258,20 +259,39 @@ export default function AdminPage() {
                 setPostToEdit({ ...postToEdit, tagline: e.target.value })
               }
             />
+            {editErrors.tagline && <p className="error">{editErrors.tagline}</p>}
+             <label>Enter content</label>
             <textarea
               value={postToEdit.content}
               onChange={(e) =>
                 setPostToEdit({ ...postToEdit, content: e.target.value })
               }
             />
+             {editErrors.content && <p className="error">{editErrors.content}</p>}
             <input
+             ref={fileInputRef} 
               type="file"
               onChange={(e) =>
                 setPostToEdit({ ...postToEdit, image: e.target.files[0] })
               }
             />
-            <button onClick={handleEditPost}>Save Changes</button>
-            <button onClick={() => setShowEditModal(false)}>Cancel</button>
+             {postToEdit.image && (
+            <button
+            disabled={isLoading}
+              style={{
+                marginRight: "20px",
+                marginLeft: "20px",
+                marginTop: "10px",
+              }}
+              className="delete-btn"
+              onClick={handleRemoveImageEdit}
+            >
+              Remove Image
+            </button>
+          )}
+            <button disabled={isLoading} style={{marginTop:"20px",marginRight:"20px"}} className= "delete-btn" onClick={handleEditPost}>  {isLoading ? <span className="loader"></span> : "Save Changes"}</button>
+            <button disabled={isLoading} className= "delete-btn"
+            onClick={handleEditCancel} >Cancel</button>
           </div>
         </div>
       )}
@@ -318,6 +338,7 @@ export default function AdminPage() {
           {/* Show "Remove Image" button if an image is uploaded */}
           {newPost.image && (
             <button
+            disabled={isLoading}
               style={{
                 marginRight: "20px",
                 marginLeft: "20px",
@@ -341,6 +362,7 @@ export default function AdminPage() {
 
           {/* Clear Form Button */}
           <button
+           disabled={isLoading}
             style={{
               margin: "20px",
             }}
@@ -365,7 +387,8 @@ export default function AdminPage() {
                   marginBottom: "20px",
                 }}
                 className="delete-btn"
-                onClick={() => setOpen(false)}
+                onClick={handleFormHide}
+                
               >
                 Hide Form
               </button>
@@ -434,6 +457,11 @@ export default function AdminPage() {
                 </tbody>
               </table>
             </div>
+            <button style={{
+              marginTop:"20px"
+            }} className="delete-btn" onClick={logOut}>
+            Logout
+          </button>
           </>
         )}
       </div>
@@ -442,7 +470,9 @@ export default function AdminPage() {
       {showDeleteModal && (
         <div className="modal">
           <div className="modal-content">
-            <p>Are you sure you want to delete this post?</p>
+            <p style={{
+              marginBottom:"20px"
+            }}>Are you sure you want to delete this post?</p>
             <button onClick={handleDeletePost} className="confirm-btn">
               Yes, Delete
             </button>
