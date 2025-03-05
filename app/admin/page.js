@@ -440,13 +440,13 @@ console.log("postToEdit",postToEdit)
                       </td>
                       <td>
                         <button
-                          className="edit-btn"
+                          className="edit-btn post-actions"
                           onClick={() => openEditModal(post)}
                         >
                           Edit
                         </button>
                         <button
-                          className="edit-btn"
+                          className="edit-btn post-actions"
                           onClick={() => openDeleteModal(post.id)}
                         >
                           Delete

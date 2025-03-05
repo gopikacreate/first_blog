@@ -297,9 +297,9 @@
 
 .admin-container {
   max-width: 900px;
-  margin: 50px 20px;
+  margin: 50px auto;
   padding: 20px;
-  background: #d77c7c;
+  background: #ffffff;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -368,6 +368,9 @@
 .post-actions {
   display: flex;
   gap: 10px;
+  margin-left: 20px;
+  flex-wrap: wrap;
+  margin-top: 10px;
 }
 
 .edit-btn,
