@@ -61,7 +61,7 @@ const BlogPosts = () => {
       )}
 
       <h1 className="main-heading">Simply Scribbled</h1>
-      <h2 className="post-date">Words, memories, and everything in between.</h2>
+      <h2 className="main-tagline">Words, memories, and everything in between.</h2>
       {loading ? (
         <div className="spinner"></div>
       ) : (
