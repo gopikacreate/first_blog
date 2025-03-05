@@ -14,7 +14,7 @@ const BlogPosts = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const postsPerPage = 3;
   const router = useRouter();
-
+const [open,setOpen]=useState(false)
   useEffect(() => {
     async function fetchPosts() {
       const querySnapshot = await getDocs(collection(db, "posts"));
@@ -74,9 +74,9 @@ const BlogPosts = () => {
               </p>
               <h2 className="post-title">{post.title}</h2>
               <p className="post-tagline">{post.tagline}</p>
-              {post.imageurl && (
+              {post.image && (
                 <img
-                  src={post.imageurl}
+                  src={post.image}
                   alt={post.title}
                   className="post-image"
                 />

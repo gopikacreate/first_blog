@@ -5,7 +5,7 @@ import { auth } from "../../lib/firebase";
 import { logOut } from "../../lib/auth";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { addPost, editPost, deletePost } from "../../lib/firebaseCrud";
+import { addPost, editPost, deletePost, uploadImage } from "../../lib/firebaseCrud";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 
@@ -17,8 +17,12 @@ export default function AdminPage() {
     title: "",
     tagline: "",
     content: "",
-    image: "",
+    image:null,
   });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [postToDelete, setPostToDelete] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [postToEdit, setPostToEdit] = useState(null);
   const postsPerPage = 5;
   const router = useRouter();
 
@@ -45,49 +49,160 @@ export default function AdminPage() {
     setPosts(fetchedPosts);
     setLoading(false);
   };
-
+  // const handleImageUpload = async (file) => {
+  //   if (!file) return null;
+  //   return await uploadImage(file);
+  // };
+  const handleImageUpload = async (file) => {
+    if (!file) return null;
+  
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "simpleblog"); // Replace with your actual upload preset
+  
+    try {
+      const response = await fetch("https://api.cloudinary.com/v1_1/defzpkljn/image/upload", {
+        method: "POST",
+        body: formData,
+      });
+  
+      const data = await response.json();
+      return data.secure_url; // URL of the uploaded image
+    } catch (error) {
+      console.error("Cloudinary upload error:", error);
+      return null;
+    }
+  };
+  
   const handleAddPost = async () => {
-    if (
-      !newPost.title ||
-      !newPost.tagline ||
-      !newPost.content ||
-      !newPost.image
-    ) {
+    if (!newPost.title || !newPost.tagline || !newPost.content || !newPost.image) {
       alert("Please fill all fields");
       return;
     }
+  
+    const imageUrl = await handleImageUpload(newPost.image);
+    if (!imageUrl) {
+      alert("Image upload failed");
+      return;
+    }
+  
     const addedPost = await addPost({
       title: newPost.title,
       tagline: newPost.tagline,
       content: newPost.content,
-      image: newPost.image,
+      image: imageUrl, // Use Cloudinary URL
       date: new Date(),
     });
+  
     if (addedPost) {
       setPosts([addedPost, ...posts]);
-      setNewPost({ title: "", tagline: "", content: "", image: "" });
+      setNewPost({ title: "", tagline: "", content: "", image: null });
     }
   };
+  
 
-  const handleEditPost = async (postId) => {
-    const newTitle = prompt("Enter new title:");
-    if (newTitle) {
-      const updatedPost = await editPost(postId, { title: newTitle });
+  // const handleAddPost = async () => {
+  //   if (!newPost.title || !newPost.tagline || !newPost.content || !newPost.image) {
+  //     alert("Please fill all fields");
+  //     return;
+  //   }
+  //   const imageUrl = await handleImageUpload(newPost.image);
+  //   if (!imageUrl) {
+  //     alert("Image upload failed");
+  //     return;
+  //   }
+  //   const addedPost = await addPost({
+  //     title: newPost.title,
+  //     tagline: newPost.tagline,
+  //     content: newPost.content,
+  //     image: newPost.image,
+  //     date: new Date(),
+  //   });
+  //   if (addedPost) {
+  //     setPosts([addedPost, ...posts]);
+  //     setNewPost({ title: "", tagline: "", content: "", image: null });
+  //   }
+  // };
+  const openEditModal = (post) => {
+    setPostToEdit(post);
+    setShowEditModal(true);
+  };
+
+  const handleEditPost = async () => {
+    if (postToEdit) {
+      let imageUrl = postToEdit.image;
+      if (typeof postToEdit.image !== "string") {
+        imageUrl = await handleImageUpload(postToEdit.image);
+      }
+  
+      const updatedPost = await editPost(postToEdit.id, {
+        title: postToEdit.title,
+        tagline: postToEdit.tagline,
+        content: postToEdit.content,
+        image: imageUrl, // Use Cloudinary URL
+        date: new Date(),
+      });
+  
       if (updatedPost) {
-        setPosts(
-          posts.map((post) => (post.id === postId ? updatedPost : post))
-        );
+        setPosts(posts.map((post) => (post.id === postToEdit.id ? updatedPost : post)));
       }
+  
+      setShowEditModal(false);
+      setPostToEdit(null);
+    }
+  };
+  
+
+  // const handleEditPost = async () => {
+  //   if (postToEdit) {
+  //     let imageUrl = postToEdit.image;
+  //     if (typeof postToEdit.image !== "string") {
+  //       imageUrl = await handleImageUpload(postToEdit.image);
+  //     }
+  //     const updatedPost = await editPost(postToEdit.id, {
+  //       title: postToEdit.title,
+  //       tagline: postToEdit.tagline,
+  //       content: postToEdit.content,
+  //       image: imageUrl,
+  //       date: new Date(),
+  //     });
+  //     if (updatedPost) {
+  //       setPosts(posts.map((post) => (post.id === postToEdit.id ? updatedPost : post)));
+  //     }
+  //     setShowEditModal(false);
+  //     setPostToEdit(null);
+  //   }
+  // };
+
+  // const handleEditPost = async () => {
+  //   if (postToEdit) {
+  //     const updatedPost = await editPost(postToEdit.id, {
+  //       title: postToEdit.title,
+  //       tagline: postToEdit.tagline,
+  //       content: postToEdit.content,
+  //       image: postToEdit.image,
+  //     });
+  //     if (updatedPost) {
+  //       setPosts(posts.map((post) => (post.id === postToEdit.id ? updatedPost : post)));
+  //     }
+  //     setShowEditModal(false);
+  //     setPostToEdit(null);
+  //   }
+  // };
+  const handleDeletePost = async () => {
+    if (postToDelete) {
+      const success = await deletePost(postToDelete);
+      if (success) {
+        setPosts(posts.filter((post) => post.id !== postToDelete));
+      }
+      setShowDeleteModal(false);
+      setPostToDelete(null);
     }
   };
 
-  const handleDeletePost = async (postId) => {
-    if (confirm("Are you sure you want to delete this post?")) {
-      const success = await deletePost(postId);
-      if (success) {
-        setPosts(posts.filter((post) => post.id !== postId));
-      }
-    }
+  const openDeleteModal = (postId) => {
+    setPostToDelete(postId);
+    setShowDeleteModal(true);
   };
 
   const indexOfLastPost = currentPage * postsPerPage;
@@ -97,57 +212,28 @@ export default function AdminPage() {
   return (
     <div className="admin-container">
       <h1 className="main-heading">Admin Panel</h1>
-
+ {/* Edit Modal */}
+ {showEditModal && postToEdit && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Edit Post</h2>
+            <input type="text" value={postToEdit.title} onChange={(e) => setPostToEdit({ ...postToEdit, title: e.target.value })} />
+            <input type="text" value={postToEdit.tagline} onChange={(e) => setPostToEdit({ ...postToEdit, tagline: e.target.value })} />
+            <textarea value={postToEdit.content} onChange={(e) => setPostToEdit({ ...postToEdit, content: e.target.value })} />
+            <input type="file" onChange={(e) => setPostToEdit({ ...postToEdit, image: e.target.files[0] })} />
+            <button onClick={handleEditPost}>Save Changes</button>
+            <button onClick={() => setShowEditModal(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
       {/* Add New Post Form */}
-
       <div className="new-post-form">
         <h2 className="form-heading">Create New Post</h2>
-        <div className="form-group">
-          <label>Title</label>
-          <input
-            type="text"
-            placeholder="Enter post title"
-            value={newPost.title}
-            onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Tagline</label>
-          <input
-            type="text"
-            placeholder="Enter tagline"
-            value={newPost.tagline}
-            onChange={(e) =>
-              setNewPost({ ...newPost, tagline: e.target.value })
-            }
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Content</label>
-          <textarea
-            placeholder="Write your post content..."
-            value={newPost.content}
-            onChange={(e) =>
-              setNewPost({ ...newPost, content: e.target.value })
-            }
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Image URL</label>
-          <input
-            type="text"
-            placeholder="Paste image link"
-            value={newPost.image}
-            onChange={(e) => setNewPost({ ...newPost, image: e.target.value })}
-          />
-        </div>
-
-        <button className="add-post-btn" onClick={handleAddPost}>
-          Add New Post
-        </button>
+        <input type="text" placeholder="Enter post title" value={newPost.title} onChange={(e) => setNewPost({ ...newPost, title: e.target.value })} />
+        <input type="text" placeholder="Enter tagline" value={newPost.tagline} onChange={(e) => setNewPost({ ...newPost, tagline: e.target.value })} />
+        <textarea placeholder="Write your post content..." value={newPost.content} onChange={(e) => setNewPost({ ...newPost, content: e.target.value })} />
+        <input type="file" onChange={(e) => setNewPost({ ...newPost, image: e.target.files[0] })} />
+        <button onClick={handleAddPost}>Add New Post</button>
       </div>
 
       <div className="posts-list">
@@ -167,33 +253,14 @@ export default function AdminPage() {
             <tbody>
               {currentPosts.map((post) => (
                 <tr key={post.id} className="post-item">
-                  <td>
-                    <img
-                      src={post.imageurl}
-                      alt="Post"
-                      className="post-image"
-                    />
-                  </td>
+                  <td><img src={post.image} alt="Post" className="post-image" /></td>
                   <td>{post.title}</td>
                   <td>{post.tagline}</td>
+                  <td>{post.date?.seconds ? new Date(post.date.seconds * 1000).toDateString() : "Date not available"}</td>
                   <td>
-                    {post.date?.seconds
-                      ? new Date(post.date.seconds * 1000).toDateString()
-                      : "Date not available"}
-                  </td>
-                  <td>
-                    <button
-                      className="edit-btn"
-                      onClick={() => handleEditPost(post.id)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="delete-btn"
-                      onClick={() => handleDeletePost(post.id)}
-                    >
-                      Delete
-                    </button>
+                  <button className="edit-btn" onClick={() => openEditModal(post)}>Edit</button>
+
+                    <button className="delete-btn" onClick={() => openDeleteModal(post.id)}>Delete</button>
                   </td>
                 </tr>
               ))}
@@ -201,26 +268,17 @@ export default function AdminPage() {
           </table>
         )}
       </div>
-
-      {/* Pagination */}
-      <div className="pagination">
-        {currentPage > 1 && (
-          <button
-            className="pagination-btn"
-            onClick={() => setCurrentPage((prev) => prev - 1)}
-          >
-            ⬅ Previous
-          </button>
-        )}
-        {indexOfLastPost < posts.length && (
-          <button
-            className="pagination-btn"
-            onClick={() => setCurrentPage((prev) => prev + 1)}
-          >
-            Next ➡
-          </button>
-        )}
-      </div>
+{console.log("showDeleteModal",showDeleteModal)}
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <p>Are you sure you want to delete this post?</p>
+            <button onClick={handleDeletePost} className="confirm-btn">Yes, Delete</button>
+            <button onClick={() => setShowDeleteModal(false)} className="cancel-btn">Cancel</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
