@@ -6,12 +6,15 @@ import { collection, getDocs } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import AdminLogin from "./loginPage";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { logOut } from "../lib/auth";
 
 const BlogPosts = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  
   const postsPerPage = 3;
   const router = useRouter();
 
@@ -42,6 +45,7 @@ const BlogPosts = () => {
           setShowLoginModal(true);
         }}
       ></div>
+   
 
       {/* Admin Login Modal */}
       {showLoginModal && (
@@ -74,7 +78,7 @@ const BlogPosts = () => {
                   : "Date not available"}
               </p>
               <h2 className="post-title">{post.title}</h2>
-              <p className="post-tagline">{post.tagline}</p>
+              <p style={{marginBottom:"10px"}} className="post-tagline">{post.tagline}</p>
               {post.image && (
                 <img
                   src={post.image}
@@ -82,7 +86,9 @@ const BlogPosts = () => {
                   className="blog-image"
                 />
               )}
-              <p className="post-content">{post.content}</p>
+              <p style={{
+                marginTop:"10px"
+              }} className="post-content">{post.content}</p>
             </div>
           ))}
           {!loading && posts.length > postsPerPage && (
@@ -105,8 +111,14 @@ const BlogPosts = () => {
               )}
             </div>
           )}
+           {/* <button style={{
+                        marginTop:"20px"
+                      }} className="delete-btn" onClick={logOut}>
+                      Log out
+                    </button> */}
         </>
       )}
+      
     </div>
   );
 };

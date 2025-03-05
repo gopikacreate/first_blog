@@ -36,10 +36,19 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef(null); // Create a ref for the file input
   const router = useRouter();
-console.log("postToEdit",postToEdit)
+  console.log("postToEdit", postToEdit);
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user || user.email !== "gopikagopakumar0799@gmail.com") {
+      // if (!user || user.email !== "gopikagopakumar0799@gmail.com") {
+      //   router.push("/");
+      // }
+
+      if (
+        !user ||
+        !["gopikagopakumar0799@gmail.com", "gopikagnair018@gmail.com"].includes(
+          user.email
+        )
+      ) {
         router.push("/");
       }
     });
@@ -71,9 +80,8 @@ console.log("postToEdit",postToEdit)
     }
   };
   const handleEditCancel = () => {
-    setShowEditModal(false)
+    setShowEditModal(false);
     setEditErrors({});
-
   };
   const handleRemoveImageEdit = () => {
     setPostToEdit({ ...postToEdit, image: null });
@@ -81,7 +89,7 @@ console.log("postToEdit",postToEdit)
       fileInputRef.current.value = ""; // Reset file input field
     }
   };
-  
+
   const handleClearForm = () => {
     setNewPost({ title: "", tagline: "", content: "", image: null });
     setErrors({});
@@ -92,11 +100,10 @@ console.log("postToEdit",postToEdit)
   };
 
   const handleFormHide = () => {
-    handleClearForm()
-    setOpen(false)
+    handleClearForm();
+    setOpen(false);
   };
 
-  
   const handleImageUpload = async (file) => {
     if (!file) return null;
 
@@ -208,7 +215,6 @@ console.log("postToEdit",postToEdit)
     }
   };
 
-  
   const handleDeletePost = async () => {
     if (postToDelete) {
       const success = await deletePost(postToDelete);
@@ -241,17 +247,17 @@ console.log("postToEdit",postToEdit)
         <div className="modal">
           <div className="modal-content">
             <h2 className="form-heading">Edit Post</h2>
-            <label>Enter post title</label>
+            <label style={{color:"#e60023"}}>Enter post title</label>
             <input
               type="text"
-               placeholder="Enter post title"
+              placeholder="Enter post title"
               value={postToEdit.title}
               onChange={(e) =>
                 setPostToEdit({ ...postToEdit, title: e.target.value })
               }
             />
-               {editErrors.title && <p className="error">{editErrors.title}</p>}
-            <label>Enter tagline</label>
+            {editErrors.title && <p className="error">{editErrors.title}</p>}
+            <label style={{color:"#e60023"}}>Enter tagline</label>
             <input
               type="text"
               value={postToEdit.tagline}
@@ -259,39 +265,56 @@ console.log("postToEdit",postToEdit)
                 setPostToEdit({ ...postToEdit, tagline: e.target.value })
               }
             />
-            {editErrors.tagline && <p className="error">{editErrors.tagline}</p>}
-             <label>Enter content</label>
+            {editErrors.tagline && (
+              <p className="error">{editErrors.tagline}</p>
+            )}
+            <label style={{color:"#e60023"}}>Enter content</label>
             <textarea
               value={postToEdit.content}
               onChange={(e) =>
                 setPostToEdit({ ...postToEdit, content: e.target.value })
               }
             />
-             {editErrors.content && <p className="error">{editErrors.content}</p>}
+            {editErrors.content && (
+              <p className="error">{editErrors.content}</p>
+            )}
             <input
-             ref={fileInputRef} 
+              ref={fileInputRef}
               type="file"
               onChange={(e) =>
                 setPostToEdit({ ...postToEdit, image: e.target.files[0] })
               }
             />
-             {postToEdit.image && (
+            {postToEdit.image && (
+              <button
+                disabled={isLoading}
+                style={{
+                  marginRight: "20px",
+                  marginLeft: "20px",
+                  marginTop: "10px",
+                }}
+                className="delete-btn"
+                onClick={handleRemoveImageEdit}
+              >
+                Remove Image
+              </button>
+            )}
             <button
-            disabled={isLoading}
-              style={{
-                marginRight: "20px",
-                marginLeft: "20px",
-                marginTop: "10px",
-              }}
+              disabled={isLoading}
+              style={{ marginTop: "20px", marginRight: "20px" }}
               className="delete-btn"
-              onClick={handleRemoveImageEdit}
+              onClick={handleEditPost}
             >
-              Remove Image
+              {" "}
+              {isLoading ? <span className="loader"></span> : "Save Changes"}
             </button>
-          )}
-            <button disabled={isLoading} style={{marginTop:"20px",marginRight:"20px"}} className= "delete-btn" onClick={handleEditPost}>  {isLoading ? <span className="loader"></span> : "Save Changes"}</button>
-            <button disabled={isLoading} className= "delete-btn"
-            onClick={handleEditCancel} >Cancel</button>
+            <button
+              disabled={isLoading}
+              className="delete-btn"
+              onClick={handleEditCancel}
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}
@@ -338,7 +361,7 @@ console.log("postToEdit",postToEdit)
           {/* Show "Remove Image" button if an image is uploaded */}
           {newPost.image && (
             <button
-            disabled={isLoading}
+              disabled={isLoading}
               style={{
                 marginRight: "20px",
                 marginLeft: "20px",
@@ -362,7 +385,7 @@ console.log("postToEdit",postToEdit)
 
           {/* Clear Form Button */}
           <button
-           disabled={isLoading}
+            disabled={isLoading}
             style={{
               margin: "20px",
             }}
@@ -388,7 +411,6 @@ console.log("postToEdit",postToEdit)
                 }}
                 className="delete-btn"
                 onClick={handleFormHide}
-                
               >
                 Hide Form
               </button>
@@ -457,11 +479,15 @@ console.log("postToEdit",postToEdit)
                 </tbody>
               </table>
             </div>
-            <button style={{
-              marginTop:"20px"
-            }} className="delete-btn" onClick={logOut}>
-            Logout
-          </button>
+            <button
+              style={{
+                marginTop: "20px",
+              }}
+              className="delete-btn"
+              onClick={logOut}
+            >
+              Log out
+            </button>
           </>
         )}
       </div>
@@ -470,9 +496,13 @@ console.log("postToEdit",postToEdit)
       {showDeleteModal && (
         <div className="modal">
           <div className="modal-content">
-            <p style={{
-              marginBottom:"20px"
-            }}>Are you sure you want to delete this post?</p>
+            <p
+              style={{
+                marginBottom: "20px",
+              }}
+            >
+              Are you sure you want to delete this post?
+            </p>
             <button onClick={handleDeletePost} className="confirm-btn">
               Yes, Delete
             </button>

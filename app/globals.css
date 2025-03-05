@@ -60,11 +60,11 @@
   font-size: 2rem;
   font-weight: bold;
   color:#e60023;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .main-tagline {
-  font-size: 2rem;
+  font-size: 1rem;
   font-weight: bold;
   color:#777;
   margin-bottom: 20px;
@@ -75,7 +75,7 @@
   padding: 20px;
   margin: 20px auto;
   border-radius: 12px;
-  width: 60%;
+  width: 80%;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   text-align: left;
 }
@@ -381,11 +381,11 @@
 
 .edit-btn,
 .delete-btn {
-  padding: 10px 16px;
+  padding: 10px 15px;
   border: none;
   cursor: pointer;
   font-size: 14px;
-  border-radius: 12px;
+  border-radius: 5px;
   transition: 0.3s;
   font-weight: bold;
 }
@@ -566,6 +566,14 @@ th, td {
   /* border-bottom: 1px solid #e60023; */
   word-wrap: break-word; /* Prevents text overflow */
   border: 1px solid #777;
+
+  /* overflow-wrap: break-word;  */
+  text-align: left; /* Aligns text for better readability */
+  /* white-space: normal;  */
+  max-width: 200px;  /* Adjust width as needed */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 th {
