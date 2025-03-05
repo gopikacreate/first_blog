@@ -542,7 +542,7 @@ textarea {
 }
 
 table {
-
+  border: 1px solid #010101;
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed; /* Ensures equal column widths */
@@ -552,7 +552,7 @@ th, td {
   padding: 12px;
   text-align: center;
   vertical-align: middle;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #000000;
   word-wrap: break-word; /* Prevents text overflow */
 }
 
