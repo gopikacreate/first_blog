@@ -13,6 +13,7 @@ import {
 } from "../../lib/firebaseCrud";
 import { collection, getDocs, Timestamp } from "firebase/firestore";
 import { db } from "../../lib/firebase";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
 export default function AdminPage() {
   const [posts, setPosts] = useState([]);
@@ -465,7 +466,7 @@ export default function AdminPage() {
               className="pagination-btn"
               onClick={() => setCurrentPage((prev) => prev - 1)}
             >
-              ⬅ Previous
+               <FaArrowLeft />  Previous
             </button>
           )}
           {indexOfLastPost < posts.length && (
@@ -473,7 +474,7 @@ export default function AdminPage() {
               className="pagination-btn"
               onClick={() => setCurrentPage((prev) => prev + 1)}
             >
-              Next ➡
+              Next <FaArrowRight  />
             </button>
           )}
         </div>

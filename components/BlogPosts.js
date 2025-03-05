@@ -6,6 +6,7 @@ import { collection, getDocs } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import LoginButton from "./LoginButton";
 import AdminLogin from "./loginPage";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
 const BlogPosts = () => {
   const [posts, setPosts] = useState([]);
@@ -91,7 +92,7 @@ const BlogPosts = () => {
                   className="pagination-btn"
                   onClick={() => setCurrentPage((prev) => prev - 1)}
                 >
-                  ⬅ Previous
+                  <FaArrowLeft /> Previous
                 </button>
               )}
               {indexOfLastPost < posts.length && (
@@ -99,7 +100,7 @@ const BlogPosts = () => {
                   className="pagination-btn"
                   onClick={() => setCurrentPage((prev) => prev + 1)}
                 >
-                  Next ➡
+                  Next <FaArrowRight  />
                 </button>
               )}
             </div>
