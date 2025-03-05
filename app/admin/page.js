@@ -384,7 +384,7 @@ export default function AdminPage() {
                overflowX:"auto",
                width:"100%"
             }}>
-                <table >
+                <table className="admin-table">
               <thead>
                 <tr>
                   <th>Image</th>

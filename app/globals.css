@@ -527,7 +527,7 @@ textarea {
 }
 
 table {
- overflow-x:auto;
+
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed; /* Ensures equal column widths */
@@ -560,4 +560,10 @@ th {
   background-color: #f3f3f3;
   color: #555;
   font-size: 12px;
+}
+
+.admin-table {
+  width: 100%;
+  min-width: 600px; /* Ensures the table doesn't shrink too much */
+  white-space: nowrap; /* Prevents text from breaking */
 }
