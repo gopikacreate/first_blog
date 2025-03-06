@@ -114,7 +114,7 @@ const BlogPosts = () => {
               )}
             </div>
           )}
-          <button
+          {/* <button
             style={{
               marginTop: "20px",
             }}
@@ -122,7 +122,7 @@ const BlogPosts = () => {
             onClick={logOut}
           >
             Log out
-          </button>
+          </button> */}
         </>
       )}
     </div>
