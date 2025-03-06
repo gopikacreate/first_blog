@@ -14,7 +14,7 @@ const BlogPosts = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  
+
   const postsPerPage = 3;
   const router = useRouter();
 
@@ -41,11 +41,9 @@ const BlogPosts = () => {
       <div
         className="hidden-admin-trigger"
         onClick={() => {
-         
           setShowLoginModal(true);
         }}
       ></div>
-   
 
       {/* Admin Login Modal */}
       {showLoginModal && (
@@ -65,7 +63,9 @@ const BlogPosts = () => {
       )}
 
       <h1 className="main-heading">Simply Scribbled</h1>
-      <h2 className="main-tagline">Words, memories, and everything in between.</h2>
+      <h2 className="main-tagline">
+        Words, memories, and everything in between.
+      </h2>
       {loading ? (
         <div className="spinner"></div>
       ) : (
@@ -78,17 +78,20 @@ const BlogPosts = () => {
                   : "Date not available"}
               </p>
               <h2 className="post-title">{post.title}</h2>
-              <p style={{marginBottom:"10px"}} className="post-tagline">{post.tagline}</p>
+              <p style={{ marginBottom: "10px" }} className="post-tagline">
+                {post.tagline}
+              </p>
               {post.image && (
-                <img
-                  src={post.image}
-                  alt={post.title}
-                  className="blog-image"
-                />
+                <img src={post.image} alt={post.title} className="blog-image" />
               )}
-              <p style={{
-                marginTop:"10px"
-              }} className="post-content">{post.content}</p>
+              <p
+                style={{
+                  marginTop: "10px",
+                }}
+                className="post-content"
+              >
+                {post.content}
+              </p>
             </div>
           ))}
           {!loading && posts.length > postsPerPage && (
@@ -106,19 +109,22 @@ const BlogPosts = () => {
                   className="pagination-btn"
                   onClick={() => setCurrentPage((prev) => prev + 1)}
                 >
-                  Next <FaArrowRight  />
+                  Next <FaArrowRight />
                 </button>
               )}
             </div>
           )}
-           {/* <button style={{
-                        marginTop:"20px"
-                      }} className="delete-btn" onClick={logOut}>
-                      Log out
-                    </button> */}
+          <button
+            style={{
+              marginTop: "20px",
+            }}
+            className="delete-btn"
+            onClick={logOut}
+          >
+            Log out
+          </button>
         </>
       )}
-      
     </div>
   );
 };

@@ -45,12 +45,15 @@ export default function AdminPage() {
 
       if (
         !user ||
-        !["gopikagopakumar0799@gmail.com", "gopikagnair018@gmail.com"].includes(
+        !["gopikagopakumar0799@gmail.com", "gopikagnair018@gmail.com","sachinvijayd13@gmail.com"].includes(
           user.email
         )
       ) {
         router.push("/");
       }
+      
+    
+      
     });
     return () => unsubscribe();
   }, [router]);

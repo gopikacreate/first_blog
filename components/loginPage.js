@@ -16,7 +16,7 @@ export default function AdminLogin() {
       if (!currentUser) {
         // No user is logged in, redirect to home
         router.push("/");
-      } else if (currentUser.email !== "gopikagopakumar0799@gmail.com") {
+      } else if (!["gopikagopakumar0799@gmail.com", "gopikagnair018@gmail.com"].includes(currentUser.email)) {
         // Unauthorized user, redirect to home
        
         router.push("/");
@@ -35,7 +35,7 @@ export default function AdminLogin() {
 
   return (
     <div className="login-container">
-      {validEmail === "gopikagopakumar0799@gmail.com" ? (
+      {["gopikagopakumar0799@gmail.com", "gopikagnair018@gmail.com","sachinvijayd13@gmail.com"].includes(validEmail) ? (
         <div>
            <div>
            <h3 style={{
@@ -45,7 +45,7 @@ export default function AdminLogin() {
          
         </div>
         </div>
-      ) :validEmail !== "gopikagopakumar0799@gmail.com" ? (
+      ) :!["gopikagopakumar0799@gmail.com", "gopikagnair018@gmail.com","sachinvijayd13@gmail.com"].includes(validEmail) ? (
         <div>
            {/* <div>
            <h3 style={{
