@@ -16,7 +16,7 @@ export default function AdminLogin() {
       if (!currentUser) {
         // No user is logged in, redirect to home
         router.push("/");
-      } else if (!["gopikagopakumar0799@gmail.com", "gopikagnair018@gmail.com"].includes(currentUser.email)) {
+      } else if (!["gopikagopakumar0799@gmail.com", "gopikagnair018@gmail.com","sachinvijayd13@gmail.com"].includes(currentUser.email)) {
         // Unauthorized user, redirect to home
        
         router.push("/");
