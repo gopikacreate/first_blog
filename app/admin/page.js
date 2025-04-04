@@ -250,7 +250,7 @@ export default function AdminPage() {
         <div className="modal">
           <div className="modal-content">
             <h2 className="form-heading">Edit Post</h2>
-            <label style={{color:"#e60023"}}>Enter post title</label>
+            <label style={{color:"#48A6A7"}}>Enter post title</label>
             <input
               type="text"
               placeholder="Enter post title"
@@ -260,7 +260,7 @@ export default function AdminPage() {
               }
             />
             {editErrors.title && <p className="error">{editErrors.title}</p>}
-            <label style={{color:"#e60023"}}>Enter tagline</label>
+            <label style={{color:"#48A6A7"}}>Enter tagline</label>
             <input
               type="text"
               value={postToEdit.tagline}
@@ -271,7 +271,7 @@ export default function AdminPage() {
             {editErrors.tagline && (
               <p className="error">{editErrors.tagline}</p>
             )}
-            <label style={{color:"#e60023"}}>Enter content</label>
+            <label style={{color:"#48A6A7"}}>Enter content</label>
             <textarea
               value={postToEdit.content}
               onChange={(e) =>
