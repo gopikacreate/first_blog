@@ -15,14 +15,14 @@
   right: 10px;
   width: 15px;
   height: 15px;
-  background:#e60023; /* Semi-transparent red */
+  background:#48A6A7; /* Semi-transparent red */
   border-radius: 50%;
   cursor: pointer;
   transition: background 0.3s;
 }
 
 .hidden-admin-trigger:hover {
-  background:#e60023; /* Darker red on hover */
+  background:#48A6A7; /* Darker red on hover */
 }
 
 /* Admin Login Modal */
@@ -59,7 +59,7 @@
 .main-heading {
   font-size: 2rem;
   font-weight: bold;
-  color:#e60023;
+  color:#48A6A7;
   margin-bottom: 10px;
 }
 
@@ -90,7 +90,7 @@
 /* Post Title */
 .post-title {
   font-size: 1.5rem;
-  color:#e60023;
+  color:#48A6A7;
 }
 
 /* Post Tagline */
@@ -134,7 +134,7 @@
   gap: 5px; /* Adjust spacing between text and icon */
   padding: 10px 20px;
   border-radius: 50px;
-  background-color: #e60023;
+  background-color: #48A6A7;
   color: white;
   border: none;
   font-size: 16px;
@@ -145,7 +145,7 @@
 }
 
 .pagination-btn:hover {
-  background:#e60023;
+  background:#48A6A7;
 }
 
 .pagination-btn:disabled {
@@ -158,7 +158,7 @@
 /* Spinner Loader */
 .spinner {
   border: 4px solid rgba(0, 0, 0, 0.1);
-  border-top: 4px solid #e60023;
+  border-top: 4px solid #48A6A7;
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -205,7 +205,7 @@
 }
 
 .admin-form button {
-  background:#e60023;
+  background:#48A6A7;
   color: white;
   padding: 10px;
   border: none;
@@ -229,7 +229,7 @@
 
 .admin-post button {
   margin-left: 10px;
-  background: #e60023;
+  background: #48A6A7;
   color: white;
   padding: 5px 10px;
   border: none;
@@ -270,13 +270,13 @@
 .admin-login-modal p {
   font-size: 18px;
   font-weight: bold;
-  color: #E60023; /* Pinterest Red */
+  color: #48A6A7; /* Pinterest Red */
   margin-bottom: 10px;
 }
 
 /* Buttons */
 .admin-login-modal button {
-  background: #E60023; /* Pinterest Red */
+  background: #48A6A7; /* Pinterest Red */
   color: white;
   border: none;
   padding: 12px 15px;
@@ -289,12 +289,12 @@
 }
 
 .admin-login-modal button:hover {
-  background:#e60023; /* Darker red */
+  background:#48A6A7; /* Darker red */
 }
 
 /* Close button */
 .admin-login-modal button:last-child {
-  background:#e60023;
+  background:#48A6A7;
 }
 
 .admin-login-modal button:last-child:hover {
@@ -314,7 +314,7 @@
   text-align: center;
   font-size: 36px;
   font-weight: bold;
-  color:#e60023;
+  color:#48A6A7;
   margin-bottom: 20px;
   font-family: 'Playfair Display', serif;
 }
@@ -324,7 +324,7 @@
   width: 100%;
   padding: 14px;
   margin-bottom: 20px;
-  background:#e60023;
+  background:#48A6A7;
   color: white;
   font-size: 18px;
   border: none;
@@ -336,7 +336,7 @@
 }
 
 .add-post-btn:hover {
-  background:#e60023;
+  background:#48A6A7;
 }
 
 .post-list {
@@ -392,7 +392,7 @@
 
 .edit-btn {
   background-color: white;
-  color: #e60023;
+  color: #48A6A7;
 }
 
 .edit-btn:hover {
@@ -400,12 +400,12 @@
 }
 
 .delete-btn {
-  background-color: #e60023;
+  background-color: #48A6A7;
   color: white;
 }
 
 .delete-btn:hover {
-  background-color:#e60023;
+  background-color:#48A6A7;
 }
 
 .pagination {
@@ -427,12 +427,12 @@
 }
 
 .page-btn.active {
-  background:#e60023;
+  background:#48A6A7;
   color: white;
 }
 
 .page-btn:hover {
-  background: #e60023;
+  background: #48A6A7;
   color: white;
 }
 .new-post-form {
@@ -449,7 +449,7 @@
   text-align: center;
   font-size: 22px;
   margin-bottom: 15px;
-  color: #e60023;
+  color: #48A6A7;
 }
 
 .form-group {
@@ -477,7 +477,7 @@ textarea {
 
 .add-post-btn {
   width: 100%;
-  background: #e60023;
+  background: #48A6A7;
   color: white;
   padding: 12px;
   font-size: 18px;
@@ -488,7 +488,7 @@ textarea {
 }
 
 .add-post-btn:hover {
-  background: #e60023;
+  background: #48A6A7;
 }
 
 .modal {
@@ -514,7 +514,7 @@ textarea {
 }
 
 .confirm-btn {
-  background-color: #e60023;
+  background-color: #48A6A7;
   color: white;
   border: none;
   padding: 10px 15px;
@@ -563,7 +563,7 @@ th, td {
   padding: 12px;
   text-align: center;
   vertical-align: middle;
-  /* border-bottom: 1px solid #e60023; */
+  /* border-bottom: 1px solid #48A6A7; */
   word-wrap: break-word; /* Prevents text overflow */
   border: 1px solid #777;
 
@@ -607,7 +607,7 @@ th {
   overflow-x: auto; /* Enables horizontal scrolling */
   white-space: nowrap; /* Prevents text from wrapping */
   scrollbar-width: thin; /* Firefox */
-  scrollbar-color: #c41e1e #e60023; /* Scrollbar colors for Firefox */
+  scrollbar-color: #c41e1e #48A6A7; /* Scrollbar colors for Firefox */
 }
 
 /* For WebKit Browsers (Chrome, Safari) */
@@ -631,5 +631,5 @@ th {
 
 
 .error{
-  color: #e60023;
+  color: #48A6A7;
 }
