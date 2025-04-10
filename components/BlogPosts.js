@@ -222,7 +222,7 @@ const BlogPosts = () => {
 
             <div className="filter-field">
               <label htmlFor="datePicker" className="post-date">
-                Select Date:
+                Select Date
               </label>
               <input
                 id="datePicker"

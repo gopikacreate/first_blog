@@ -752,7 +752,7 @@ th {
 }
 
 .confirm-actions button:last-child {
-  background: crimson;
+  background: #007d7d;
   color: white;
 }
 
@@ -843,7 +843,7 @@ th {
   padding: 8px;
   font-size: 16px;
   width: 100%;
-  max-width: 300px;
+  /* max-width: 300px; */
   box-sizing: border-box;
   border: 1px solid #ccc;
   border-radius: 5px;
