@@ -38,7 +38,10 @@ const BlogPosts = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [confirmationMessage, setConfirmationMessage] = useState("");
   const [deleteLoadingId, setDeleteLoadingId] = useState(null);
-  const [confirmDelete, setConfirmDelete] = useState({ postId: null, commentId: null });
+  const [confirmDelete, setConfirmDelete] = useState({
+    postId: null,
+    commentId: null,
+  });
 
   const postsPerPage = 3;
   const router = useRouter();
@@ -48,8 +51,13 @@ const BlogPosts = () => {
       const querySnapshot = await getDocs(collection(db, "posts"));
       const postData = await Promise.all(
         querySnapshot.docs.map(async (doc) => {
-          const commentsSnapshot = await getDocs(collection(db, "posts", doc.id, "comments"));
-          const comments = commentsSnapshot.docs.map((c) => ({ id: c.id, ...c.data() }));
+          const commentsSnapshot = await getDocs(
+            collection(db, "posts", doc.id, "comments")
+          );
+          const comments = commentsSnapshot.docs.map((c) => ({
+            id: c.id,
+            ...c.data(),
+          }));
           return { id: doc.id, ...doc.data(), comments };
         })
       );
@@ -147,17 +155,26 @@ const BlogPosts = () => {
 
   return (
     <div className="blog-container">
-      {confirmationMessage && <div className="confirmation-box">{confirmationMessage}</div>}
-      {console.log("confirmDelete.postId",confirmDelete)}
+      {confirmationMessage && (
+        <div className="confirmation-box">{confirmationMessage}</div>
+      )}
+      {console.log("confirmDelete.postId", confirmDelete)}
       {confirmDelete.postId && (
         <div className="confirm-modal">
           <div className="confirm-box">
             <p>Are you sure you want to delete this comment?</p>
             <div className="confirm-actions">
-              <button onClick={() => setConfirmDelete({ postId: null, commentId: null })}>
+              <button
+                onClick={() =>
+                  setConfirmDelete({ postId: null, commentId: null })
+                }
+              >
                 Cancel
               </button>
-              <button onClick={handleCommentDelete} disabled={deleteLoadingId !== null}>
+              <button
+                onClick={handleCommentDelete}
+                disabled={deleteLoadingId !== null}
+              >
                 {deleteLoadingId ? "Deleting..." : "Delete"}
               </button>
             </div>
@@ -172,8 +189,14 @@ const BlogPosts = () => {
       ></div>
 
       {showLoginModal && (
-        <div className="admin-login-overlay" onClick={() => setShowLoginModal(false)}>
-          <div className="admin-login-modal" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="admin-login-overlay"
+          onClick={() => setShowLoginModal(false)}
+        >
+          <div
+            className="admin-login-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
             <p>Admin Login</p>
             <AdminLogin />
             <button onClick={() => setShowLoginModal(false)}>Close</button>
@@ -182,135 +205,182 @@ const BlogPosts = () => {
       )}
 
       <h1 className="main-heading">Simply Scribbled</h1>
-      <h2 className="main-tagline">Words, memories, and everything in between.</h2>
-
-     
+      <h2 className="main-tagline">
+        Words, memories, and everything in between.
+      </h2>
 
       {loading ? (
         <div className="spinner"></div>
       ) : (
         <>
-         <div className="filter-box">
-        <input
-          type="date"
-          value={selectedDate}
-          onChange={(e) => setSelectedDate(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Search by title keyword"
-          value={searchKeyword}
-          onChange={(e) => setSearchKeyword(e.target.value)}
-        />
-        <button style={{ marginRight:"10px"}} className="filter-button" onClick={handleFilter}>Filter</button>
-        <button className="filter-button" onClick={handleReset}>Reset</button>
-      </div>
-      {filteredPosts.length === 0 ? (
+          <div className="filter-box">
+            {/* <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+            /> */}
+
+            <div className="filter-field">
+              <label htmlFor="datePicker" className="post-date">
+                Select Date:
+              </label>
+              <input
+                id="datePicker"
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="filter-input"
+              />
+            </div>
+
+            <input
+              type="text"
+              placeholder="Search by title keyword"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+            />
+            <button
+              style={{ marginRight: "10px" }}
+              className="filter-button"
+              onClick={handleFilter}
+            >
+              Filter
+            </button>
+            <button className="filter-button" onClick={handleReset}>
+              Reset
+            </button>
+          </div>
+          {filteredPosts.length === 0 ? (
             <p style={{ marginTop: "20px", fontStyle: "italic" }}>
               No posts match your filter criteria.
             </p>
           ) : (
-          currentPosts.map((post) => (
-            <div key={post.id} className="blog-post">
-              <p className="post-date">
-                {post.date?.seconds
-                  ? new Date(post.date.seconds * 1000).toDateString()
-                  : "Date not available"}
-              </p>
-              <h2 className="post-title">{post.title}</h2>
-              <p className="post-tagline">{post.tagline}</p>
-              {post.image && (
-                <img
-                  src={post.image}
-                  alt={post.title}
-                  className="blog-image"
-                />
-              )}
-              <p className="post-content">{post.content}</p>
+            currentPosts.map((post) => (
+              <div key={post.id} className="blog-post">
+                <p className="post-date">
+                  {post.date?.seconds
+                    ? new Date(post.date.seconds * 1000).toDateString()
+                    : "Date not available"}
+                </p>
+                <h2 className="post-title">{post.title}</h2>
+                <p className="post-tagline">{post.tagline}</p>
+                {post.image && (
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    className="blog-image"
+                  />
+                )}
+                <p className="post-content">{post.content}</p>
 
-              <div className="comment-section">
-                <h3>Comments</h3>
-                {post.comments && post.comments.length > 0 ? (
-                  post.comments.map((comment) => (
-                    <div key={comment.id} className="single-comment" style={{
-                      backgroundColor: "#f9f9f9",
-                      padding: "10px",
-                      marginBottom: "10px",
-                      borderRadius: "8px",
-                      boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
-                      position: "relative",
-                    }}>
-                      {editingCommentId === comment.id ? (
-                        <>
-                          <textarea
-                            value={editingCommentText}
-                            onChange={(e) => setEditingCommentText(e.target.value)}
-                          />
-                          <button style={{marginRight:"10px"}}
-                            onClick={() => handleCommentEdit(post.id, comment.id)}
-                            disabled={isProcessing}
-                          >
-                            {isProcessing ? "Saving..." : "Save"}
-                          </button>
-                          <button
-                            onClick={() => setEditingCommentId(null)}
-                          >
-                            Cancel
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <p style={{ marginBottom: "4px" }}>{comment.text}</p>
-                          <small style={{ display: "block", color: "#555" }}>
-                            {comment.createdAt?.seconds
-                              ? new Date(comment.createdAt.seconds * 1000).toLocaleString()
-                              : "Just now"}
-                          </small>
-                          {isAdmin && (
-                            <div style={{ position: "absolute", top: "10px", right: "10px", display: "flex", gap: "10px" }}>
-                              <FaEdit
-                                style={{ cursor: "pointer" }}
-                                onClick={() => {
-                                  setEditingCommentId(comment.id);
-                                  setEditingCommentText(comment.text);
+                <div className="comment-section">
+                  <h3>Comments</h3>
+                  {post.comments && post.comments.length > 0 ? (
+                    post.comments.map((comment) => (
+                      <div
+                        key={comment.id}
+                        className="single-comment"
+                        style={{
+                          backgroundColor: "#f9f9f9",
+                          padding: "10px",
+                          marginBottom: "10px",
+                          borderRadius: "8px",
+                          boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+                          position: "relative",
+                        }}
+                      >
+                        {editingCommentId === comment.id ? (
+                          <>
+                            <textarea
+                              value={editingCommentText}
+                              onChange={(e) =>
+                                setEditingCommentText(e.target.value)
+                              }
+                            />
+                            <button
+                              style={{ marginRight: "10px" }}
+                              onClick={() =>
+                                handleCommentEdit(post.id, comment.id)
+                              }
+                              disabled={isProcessing}
+                            >
+                              {isProcessing ? "Saving..." : "Save"}
+                            </button>
+                            <button onClick={() => setEditingCommentId(null)}>
+                              Cancel
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <p style={{ marginBottom: "4px" }}>
+                              {comment.text}
+                            </p>
+                            <small style={{ display: "block", color: "#555" }}>
+                              {comment.createdAt?.seconds
+                                ? new Date(
+                                    comment.createdAt.seconds * 1000
+                                  ).toLocaleString()
+                                : "Just now"}
+                            </small>
+                            {isAdmin && (
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  top: "10px",
+                                  right: "10px",
+                                  display: "flex",
+                                  gap: "10px",
                                 }}
-                              />
-                              <FaTrash
-                                style={{ cursor: "pointer" }}
-                                // onClick={() => handleCommentDelete(post.id, comment.id)}
-                                onClick={() => setConfirmDelete({ postId: post.id, commentId: comment.id })}
-                              />
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <p>No comments yet.</p>
-                )}
+                              >
+                                <FaEdit
+                                  style={{ cursor: "pointer" }}
+                                  onClick={() => {
+                                    setEditingCommentId(comment.id);
+                                    setEditingCommentText(comment.text);
+                                  }}
+                                />
+                                <FaTrash
+                                  style={{ cursor: "pointer" }}
+                                  // onClick={() => handleCommentDelete(post.id, comment.id)}
+                                  onClick={() =>
+                                    setConfirmDelete({
+                                      postId: post.id,
+                                      commentId: comment.id,
+                                    })
+                                  }
+                                />
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p>No comments yet.</p>
+                  )}
 
-                {user && (
-                  <>
-                    <textarea
-                      placeholder="Leave a comment..."
-                      value={commentingPostId === post.id ? commentText : ""}
-                      onChange={(e) => {
-                        setCommentingPostId(post.id);
-                        setCommentText(e.target.value);
-                      }}
-                    ></textarea>
-                    <button
-                      onClick={() => handleCommentSubmit(post.id)}
-                      disabled={isProcessing}
-                    >
-                      {isProcessing ? "Posting..." : "Post"}
-                    </button>
-                  </>
-                )}
+                  {user && (
+                    <>
+                      <textarea
+                        placeholder="Leave a comment..."
+                        value={commentingPostId === post.id ? commentText : ""}
+                        onChange={(e) => {
+                          setCommentingPostId(post.id);
+                          setCommentText(e.target.value);
+                        }}
+                      ></textarea>
+                      <button
+                        onClick={() => handleCommentSubmit(post.id)}
+                        disabled={isProcessing}
+                      >
+                        {isProcessing ? "Posting..." : "Post"}
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-          )))}
+            ))
+          )}
 
           {!loading && filteredPosts.length > postsPerPage && (
             <div className="pagination">
