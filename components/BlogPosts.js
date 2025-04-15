@@ -61,12 +61,43 @@ const BlogPosts = () => {
           return { id: doc.id, ...doc.data(), comments };
         })
       );
+  
+      // 🆕 Sort posts by date (latest first)
+      postData.sort((a, b) => {
+        const dateA = a.date?.seconds || 0;
+        const dateB = b.date?.seconds || 0;
+        return dateB - dateA; // descending order
+      });
+  
       setPosts(postData);
       setFilteredPosts(postData);
       setLoading(false);
     }
     fetchPosts();
   }, []);
+  
+
+  // useEffect(() => {
+  //   async function fetchPosts() {
+  //     const querySnapshot = await getDocs(collection(db, "posts"));
+  //     const postData = await Promise.all(
+  //       querySnapshot.docs.map(async (doc) => {
+  //         const commentsSnapshot = await getDocs(
+  //           collection(db, "posts", doc.id, "comments")
+  //         );
+  //         const comments = commentsSnapshot.docs.map((c) => ({
+  //           id: c.id,
+  //           ...c.data(),
+  //         }));
+  //         return { id: doc.id, ...doc.data(), comments };
+  //       })
+  //     );
+  //     setPosts(postData);
+  //     setFilteredPosts(postData);
+  //     setLoading(false);
+  //   }
+  //   fetchPosts();
+  // }, []);
 
   useEffect(() => {
     const auth = getAuth();
@@ -158,7 +189,7 @@ const BlogPosts = () => {
       {confirmationMessage && (
         <div className="confirmation-box">{confirmationMessage}</div>
       )}
-      {console.log("confirmDelete.postId", confirmDelete)}
+    
       {confirmDelete.postId && (
         <div className="confirm-modal">
           <div className="confirm-box">
