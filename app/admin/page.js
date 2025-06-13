@@ -723,7 +723,32 @@ export default function AdminPage() {
                   {currentPosts.map((post) => (
                     <tr key={post.id}>
                       <td>
-                        {post.image ? (
+                    
+                          {post.image ? (
+                            <img
+                              src={post.image}
+                              alt="Post"
+                              className="post-image"
+                            />
+                          ) : post.video ? (
+                            <video
+                              src={post.video}
+                              className="post-image"
+                              style={{
+                                width: "60px",
+                                height: "60px",
+                                objectFit: "cover",
+                                borderRadius: "6px",
+                              }}
+                              muted
+                              playsInline
+                            />
+                          ) : (
+                            <div className="no-image">No Image</div>
+                          )}
+                        
+
+                        {/* {post.image ? (
                           <img
                             src={post.image}
                             alt="Post"
@@ -731,7 +756,7 @@ export default function AdminPage() {
                           />
                         ) : (
                           <div className="no-image">No Image</div>
-                        )}
+                        )} */}
                       </td>
                       <td>{post.title}</td>
                       <td>{post.tagline}</td>
