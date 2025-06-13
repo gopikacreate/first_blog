@@ -20,6 +20,22 @@ const ADMIN_EMAILS = [
   "gopikagnair018@gmail.com",
   "sachinvijayd13@gmail.com",
 ];
+/** Return a Cloudinary thumbnail URL taken at 1-second mark */
+const getVideoThumbnail = (videoUrl) => {
+  if (!videoUrl) return null;
+
+  try {
+    const parts = videoUrl.split("/upload/");
+    const pathAfterUpload = parts[1]; // e.g. "v1710000000/sample.mp4"
+    const publicId = pathAfterUpload.replace(/\.[^/.]+$/, ""); // remove .mp4 or any extension
+
+    return `${parts[0]}/upload/so_1/${publicId}.jpg`;
+  } catch (error) {
+    console.error("Thumbnail URL error:", error);
+    return null;
+  }
+};
+
 
 const BlogPosts = () => {
   const [posts, setPosts] = useState([]);
@@ -307,6 +323,7 @@ const BlogPosts = () => {
                   <video
                     src={post.video}
                     controls
+                     poster={getVideoThumbnail(post.video)} 
                     playsInline
                     className="blog-video"
                     style={{

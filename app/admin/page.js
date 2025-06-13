@@ -64,16 +64,41 @@ export default function AdminPage() {
     fetchPosts();
   }, []);
 
-  const fetchPosts = async () => {
-    setLoading(true);
-    const querySnapshot = await getDocs(collection(db, "posts"));
-    const fetchedPosts = querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    setPosts(fetchedPosts);
-    setLoading(false);
-  };
+  // const fetchPosts = async () => {
+  //   setLoading(true);
+  //   const querySnapshot = await getDocs(collection(db, "posts"));
+  //   const fetchedPosts = querySnapshot.docs.map((doc) => ({
+  //     id: doc.id,
+  //     ...doc.data(),
+  //   }));
+  //   setPosts(fetchedPosts);
+  //   setLoading(false);
+  // };
+
+
+const fetchPosts = async () => {
+  setLoading(true);
+  const querySnapshot = await getDocs(collection(db, "posts"));
+
+  const fetchedPosts = querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+
+  // ✅ Sort by date (descending — latest first)
+  fetchedPosts.sort((a, b) => {
+    const dateA = a.date?.seconds || 0;
+    const dateB = b.date?.seconds || 0;
+    return dateB - dateA;
+  });
+
+  setPosts(fetchedPosts);
+  setLoading(false);
+};
+
+
+
+  
   // const handleImageUpload = async (file) => {
   //   if (!file) return null;
   //   return await uploadImage(file);
@@ -733,7 +758,7 @@ export default function AdminPage() {
                           ) : post.video ? (
                             <video
                               src={post.video}
-                              className="post-image"
+                               className="post-thumb"
                               style={{
                                 width: "60px",
                                 height: "60px",
