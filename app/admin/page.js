@@ -455,14 +455,14 @@ const handleMediaUpload = async (file) => {
 
       {/* ── preview section ─────────────────────────── */}
       {postToEdit.image && typeof postToEdit.image === "string" && (
-        <img src={postToEdit.image} alt="preview" className="blog-image" />
+        <img src={postToEdit.image} alt="preview" className="edit-video" />
       )}
       {postToEdit.video && typeof postToEdit.video === "string" && (
         <video
           src={postToEdit.video}
           controls
-          className="blog-video"
-          style={{ maxWidth: "100%", marginTop: "10px" }}
+          className="edit-video"
+          // style={{ maxWidth: "100%", marginTop: "10px" }}
         />
       )}
 
