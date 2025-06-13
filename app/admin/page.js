@@ -194,12 +194,12 @@ export default function AdminPage() {
 
     if (newPost.image) {
       // if user picked an image
-      imageUrl = await handleImageUpload(newPost.image);
+      imageUrl = await handleMediaUpload(newPost.image);
     }
 
     if (newPost.video) {
       // if user picked a video
-      videoUrl = await handleImageUpload(newPost.video);
+      videoUrl = await handleMediaUpload(newPost.video);
     }
 
     try {
