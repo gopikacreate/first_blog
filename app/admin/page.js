@@ -24,7 +24,10 @@ export default function AdminPage() {
     tagline: "",
     content: "",
     image: null,
+    video: null,
   });
+  console.log("Post debug:", newPost);
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [postToDelete, setPostToDelete] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -45,15 +48,14 @@ export default function AdminPage() {
 
       if (
         !user ||
-        !["gopikagopakumar0799@gmail.com", "gopikagnair018@gmail.com","sachinvijayd13@gmail.com"].includes(
-          user.email
-        )
+        ![
+          "gopikagopakumar0799@gmail.com",
+          "gopikagnair018@gmail.com",
+          "sachinvijayd13@gmail.com",
+        ].includes(user.email)
       ) {
         router.push("/");
       }
-      
-    
-      
     });
     return () => unsubscribe();
   }, [router]);
@@ -76,12 +78,20 @@ export default function AdminPage() {
   //   if (!file) return null;
   //   return await uploadImage(file);
   // };
-  const handleRemoveImage = () => {
-    setNewPost({ ...newPost, image: null });
+  // const handleRemoveMedia = () => {
+  //   setNewPost({ ...newPost, image: null });
+  //   if (fileInputRef.current) {
+  //     fileInputRef.current.value = ""; // Reset file input field
+  //   }
+  // };
+
+  const handleRemoveMedia = () => {
+    setNewPost({ ...newPost, image: null, video: null });
     if (fileInputRef.current) {
-      fileInputRef.current.value = ""; // Reset file input field
+      fileInputRef.current.value = "";
     }
   };
+
   const handleEditCancel = () => {
     setShowEditModal(false);
     setEditErrors({});
@@ -94,7 +104,13 @@ export default function AdminPage() {
   };
 
   const handleClearForm = () => {
-    setNewPost({ title: "", tagline: "", content: "", image: null });
+    setNewPost({
+      title: "",
+      tagline: "",
+      content: "",
+      image: null,
+      video: null,
+    });
     setErrors({});
 
     if (fileInputRef.current) {
@@ -107,51 +123,81 @@ export default function AdminPage() {
     setOpen(false);
   };
 
+  // upload image OR video to Cloudinary and return the URL
   const handleImageUpload = async (file) => {
     if (!file) return null;
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "simpleblog"); // Replace with your actual upload preset
+    formData.append("upload_preset", "simpleblog"); // your preset
+
+    // choose the correct Cloudinary endpoint
+    const endpoint = file.type.startsWith("video")
+      ? "https://api.cloudinary.com/v1_1/defzpkljn/video/upload"
+      : "https://api.cloudinary.com/v1_1/defzpkljn/image/upload";
 
     try {
-      const response = await fetch(
-        "https://api.cloudinary.com/v1_1/defzpkljn/image/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      const data = await response.json();
-      return data.secure_url; // URL of the uploaded image
-    } catch (error) {
-      console.error("Cloudinary upload error:", error);
+      const res = await fetch(endpoint, { method: "POST", body: formData });
+      const data = await res.json();
+      return data.secure_url; // ← save this in Firestore
+    } catch (err) {
+      console.error("Cloudinary upload error:", err);
       return null;
     }
   };
+
+  // const handleImageUpload = async (file) => {
+  //   if (!file) return null;
+
+  //   const formData = new FormData();
+  //   formData.append("file", file);
+  //   formData.append("upload_preset", "simpleblog"); // Replace with your actual upload preset
+
+  //   try {
+  //     const response = await fetch(
+  //       "https://api.cloudinary.com/v1_1/defzpkljn/image/upload",
+  //       {
+  //         method: "POST",
+  //         body: formData,
+  //       }
+  //     );
+
+  //     const data = await response.json();
+  //     return data.secure_url; // URL of the uploaded image
+  //   } catch (error) {
+  //     console.error("Cloudinary upload error:", error);
+  //     return null;
+  //   }
+  // };
 
   const handleAddPost = async () => {
     setIsLoading(true);
     setErrors({}); // Reset validation errors
 
-    let validationErrors = {};
-
-    // Validate required fields
+    // ── simple field validation ──
+    const validationErrors = {};
     if (!newPost.title) validationErrors.title = "Title is required";
     if (!newPost.tagline) validationErrors.tagline = "Tagline is required";
     if (!newPost.content) validationErrors.content = "Content is required";
 
-    // If errors exist, update state and stop function execution
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       setIsLoading(false);
       return;
     }
 
+    // ── upload media (image OR video) ──
     let imageUrl = null;
+    let videoUrl = null;
+
     if (newPost.image) {
+      // if user picked an image
       imageUrl = await handleImageUpload(newPost.image);
+    }
+
+    if (newPost.video) {
+      // if user picked a video
+      videoUrl = await handleImageUpload(newPost.video);
     }
 
     try {
@@ -159,13 +205,20 @@ export default function AdminPage() {
         title: newPost.title,
         tagline: newPost.tagline,
         content: newPost.content,
-        image: imageUrl, // Image is optional
+        image: imageUrl, // may be null
+        video: videoUrl, // may be null
         date: Timestamp.fromDate(new Date()),
       });
 
       if (addedPost) {
         setPosts([addedPost, ...posts]);
-        setNewPost({ title: "", tagline: "", content: "", image: null });
+        setNewPost({
+          title: "",
+          tagline: "",
+          content: "",
+          image: null,
+          video: null,
+        });
         setOpen(false);
       }
     } catch (error) {
@@ -174,6 +227,50 @@ export default function AdminPage() {
       setIsLoading(false);
     }
   };
+
+  // const handleAddPost = async () => {
+  //   setIsLoading(true);
+  //   setErrors({}); // Reset validation errors
+
+  //   let validationErrors = {};
+
+  //   // Validate required fields
+  //   if (!newPost.title) validationErrors.title = "Title is required";
+  //   if (!newPost.tagline) validationErrors.tagline = "Tagline is required";
+  //   if (!newPost.content) validationErrors.content = "Content is required";
+
+  //   // If errors exist, update state and stop function execution
+  //   if (Object.keys(validationErrors).length > 0) {
+  //     setErrors(validationErrors);
+  //     setIsLoading(false);
+  //     return;
+  //   }
+
+  //   let imageUrl = null;
+  //   if (newPost.image) {
+  //     imageUrl = await handleImageUpload(newPost.image);
+  //   }
+
+  //   try {
+  //     const addedPost = await addPost({
+  //       title: newPost.title,
+  //       tagline: newPost.tagline,
+  //       content: newPost.content,
+  //       image: imageUrl, // Image is optional
+  //       date: Timestamp.fromDate(new Date()),
+  //     });
+
+  //     if (addedPost) {
+  //       setPosts([addedPost, ...posts]);
+  //       setNewPost({ title: "", tagline: "", content: "", image: null });
+  //       setOpen(false);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error adding post:", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   const openEditModal = (post) => {
     setPostToEdit(post);
@@ -250,7 +347,7 @@ export default function AdminPage() {
         <div className="modal">
           <div className="modal-content">
             <h2 className="form-heading">Edit Post</h2>
-            <label style={{color:"#48A6A7"}}>Enter post title</label>
+            <label style={{ color: "#48A6A7" }}>Enter post title</label>
             <input
               type="text"
               placeholder="Enter post title"
@@ -260,7 +357,7 @@ export default function AdminPage() {
               }
             />
             {editErrors.title && <p className="error">{editErrors.title}</p>}
-            <label style={{color:"#48A6A7"}}>Enter tagline</label>
+            <label style={{ color: "#48A6A7" }}>Enter tagline</label>
             <input
               type="text"
               value={postToEdit.tagline}
@@ -271,7 +368,7 @@ export default function AdminPage() {
             {editErrors.tagline && (
               <p className="error">{editErrors.tagline}</p>
             )}
-            <label style={{color:"#48A6A7"}}>Enter content</label>
+            <label style={{ color: "#48A6A7" }}>Enter content</label>
             <textarea
               value={postToEdit.content}
               onChange={(e) =>
@@ -353,12 +450,26 @@ export default function AdminPage() {
           />
           {errors.content && <p className="error">{errors.content}</p>}
 
-          <input
+          {/* <input
             ref={fileInputRef} // Attach ref to the file input
             type="file"
             onChange={(e) =>
               setNewPost({ ...newPost, image: e.target.files[0] })
             }
+          /> */}
+
+          <input
+            type="file"
+            accept="image/*,video/*"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+              setNewPost({
+                ...newPost,
+                image: file.type.startsWith("image") ? file : null,
+                video: file.type.startsWith("video") ? file : null,
+              });
+            }}
           />
 
           {/* Show "Remove Image" button if an image is uploaded */}
@@ -371,7 +482,7 @@ export default function AdminPage() {
                 marginTop: "10px",
               }}
               className="delete-btn"
-              onClick={handleRemoveImage}
+              onClick={handleRemoveMedia}
             >
               Remove Image
             </button>

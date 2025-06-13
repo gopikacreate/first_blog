@@ -61,21 +61,20 @@ const BlogPosts = () => {
           return { id: doc.id, ...doc.data(), comments };
         })
       );
-  
+
       // 🆕 Sort posts by date (latest first)
       postData.sort((a, b) => {
         const dateA = a.date?.seconds || 0;
         const dateB = b.date?.seconds || 0;
         return dateB - dateA; // descending order
       });
-  
+
       setPosts(postData);
       setFilteredPosts(postData);
       setLoading(false);
     }
     fetchPosts();
   }, []);
-  
 
   // useEffect(() => {
   //   async function fetchPosts() {
@@ -119,6 +118,7 @@ const BlogPosts = () => {
           new Date(selectedDate).toDateString()
       );
     }
+    
     if (searchKeyword) {
       filtered = filtered.filter((post) =>
         post.title.toLowerCase().includes(searchKeyword.toLowerCase())
@@ -189,7 +189,7 @@ const BlogPosts = () => {
       {confirmationMessage && (
         <div className="confirmation-box">{confirmationMessage}</div>
       )}
-    
+
       {confirmDelete.postId && (
         <div className="confirm-modal">
           <div className="confirm-box">
@@ -300,6 +300,15 @@ const BlogPosts = () => {
                     src={post.image}
                     alt={post.title}
                     className="blog-image"
+                  />
+                )}
+
+                {post.video && (
+                  <video
+                    src={post.video}
+                    controls
+                    className="blog-video"
+                    style={{ maxWidth: "100%", margin: "20px 0" }}
                   />
                 )}
                 <p className="post-content">{post.content}</p>
