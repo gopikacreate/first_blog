@@ -118,7 +118,7 @@ const BlogPosts = () => {
           new Date(selectedDate).toDateString()
       );
     }
-    
+
     if (searchKeyword) {
       filtered = filtered.filter((post) =>
         post.title.toLowerCase().includes(searchKeyword.toLowerCase())
@@ -307,9 +307,25 @@ const BlogPosts = () => {
                   <video
                     src={post.video}
                     controls
+                    playsInline
                     className="blog-video"
-                    style={{ maxWidth: "100%", margin: "20px 0" }}
+                    style={{
+                      width: "100%",
+                      height: "auto",
+                      maxHeight: "400px",
+                      objectFit: "contain", // ✅ switch from cover to contain
+                      borderRadius: "10px",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                      marginTop: "10px",
+                    }}
                   />
+
+                  // <video
+                  //   src={post.video}
+                  //   controls
+                  //   className="blog-video"
+                  //   style={{ maxWidth: "100%", margin: "20px 0" }}
+                  // />
                 )}
                 <p className="post-content">{post.content}</p>
 

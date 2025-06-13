@@ -124,27 +124,30 @@ export default function AdminPage() {
   };
 
   // upload image OR video to Cloudinary and return the URL
-  const handleImageUpload = async (file) => {
-    if (!file) return null;
+const handleMediaUpload = async (file) => {
+  if (!file) return null;
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", "simpleblog"); // your preset
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", "simpleblog");
 
-    // choose the correct Cloudinary endpoint
-    const endpoint = file.type.startsWith("video")
-      ? "https://api.cloudinary.com/v1_1/defzpkljn/video/upload"
-      : "https://api.cloudinary.com/v1_1/defzpkljn/image/upload";
+  const endpoint = file.type.startsWith("video")
+    ? "https://api.cloudinary.com/v1_1/defzpkljn/video/upload"
+    : "https://api.cloudinary.com/v1_1/defzpkljn/image/upload";
 
-    try {
-      const res = await fetch(endpoint, { method: "POST", body: formData });
-      const data = await res.json();
-      return data.secure_url; // ← save this in Firestore
-    } catch (err) {
-      console.error("Cloudinary upload error:", err);
-      return null;
-    }
-  };
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      body: formData,
+    });
+    const data = await res.json();
+    return data.secure_url;
+  } catch (error) {
+    console.error("Upload error:", error);
+    return null;
+  }
+};
+
 
   // const handleImageUpload = async (file) => {
   //   if (!file) return null;
@@ -277,43 +280,95 @@ export default function AdminPage() {
     setShowEditModal(true);
   };
 
+
   const handleEditPost = async () => {
-    setIsLoading(true);
-    setEditErrors({});
-    let validationErrors = {};
-    // Validate required fields
-    if (!postToEdit.title) validationErrors.title = "Title is required";
-    if (!postToEdit.tagline) validationErrors.tagline = "Tagline is required";
-    if (!postToEdit.content) validationErrors.content = "Content is required";
-    if (Object.keys(validationErrors).length > 0) {
-      setEditErrors(validationErrors);
-      setIsLoading(false);
-      return;
-    }
-    if (postToEdit) {
-      let imageUrl = postToEdit.image;
-      if (typeof postToEdit.image !== "string") {
-        imageUrl = await handleImageUpload(postToEdit.image);
-      }
+  setIsLoading(true);
+  setEditErrors({});
 
-      const updatedPost = await editPost(postToEdit.id, {
-        title: postToEdit.title,
-        tagline: postToEdit.tagline,
-        content: postToEdit.content,
-        image: imageUrl, // Use Cloudinary URL
-        date: Timestamp.fromDate(new Date()),
-      });
+  const validationErrors = {};
+  if (!postToEdit.title) validationErrors.title = "Title is required";
+  if (!postToEdit.tagline) validationErrors.tagline = "Tagline is required";
+  if (!postToEdit.content) validationErrors.content = "Content is required";
 
-      if (updatedPost) {
-        setPosts(
-          posts.map((post) => (post.id === postToEdit.id ? updatedPost : post))
-        );
-      }
-      setIsLoading(false);
-      setShowEditModal(false);
-      setPostToEdit(null);
+  if (Object.keys(validationErrors).length > 0) {
+    setEditErrors(validationErrors);
+    setIsLoading(false);
+    return;
+  }
+
+  try {
+    let imageUrl = postToEdit.image;
+    let videoUrl = postToEdit.video;
+
+    // Upload image if it's a new File (not a URL)
+    if (postToEdit.image && typeof postToEdit.image !== "string") {
+      imageUrl = await handleMediaUpload(postToEdit.image);
     }
-  };
+
+    // Upload video if it's a new File (not a URL)
+    if (postToEdit.video && typeof postToEdit.video !== "string") {
+      videoUrl = await handleMediaUpload(postToEdit.video);
+    }
+
+    const updatedPost = await editPost(postToEdit.id, {
+      title: postToEdit.title,
+      tagline: postToEdit.tagline,
+      content: postToEdit.content,
+      image: imageUrl || null,
+      video: videoUrl || null,
+      date: Timestamp.fromDate(new Date()),
+    });
+
+    if (updatedPost) {
+      setPosts(posts.map((post) => (post.id === postToEdit.id ? updatedPost : post)));
+    }
+
+    setIsLoading(false);
+    setShowEditModal(false);
+    setPostToEdit(null);
+  } catch (error) {
+    console.error("Error updating post:", error);
+    setIsLoading(false);
+  }
+};
+
+  // const handleEditPost = async () => {
+  //   setIsLoading(true);
+  //   setEditErrors({});
+  //   let validationErrors = {};
+  //   // Validate required fields
+  //   if (!postToEdit.title) validationErrors.title = "Title is required";
+  //   if (!postToEdit.tagline) validationErrors.tagline = "Tagline is required";
+  //   if (!postToEdit.content) validationErrors.content = "Content is required";
+  //   if (Object.keys(validationErrors).length > 0) {
+  //     setEditErrors(validationErrors);
+  //     setIsLoading(false);
+  //     return;
+  //   }
+  //   if (postToEdit) {
+  //     let imageUrl = postToEdit.image;
+  //     if (typeof postToEdit.image !== "string") {
+  //       imageUrl = await handleImageUpload(postToEdit.image);
+  //     }
+
+  //     const updatedPost = await editPost(postToEdit.id, {
+  //       title: postToEdit.title,
+  //       tagline: postToEdit.tagline,
+  //       content: postToEdit.content,
+  //       image: imageUrl, // Use Cloudinary URL
+  //       date: Timestamp.fromDate(new Date()),
+  //     });
+
+  //     if (updatedPost) {
+  //       setPosts(
+  //         posts.map((post) => (post.id === postToEdit.id ? updatedPost : post))
+  //       );
+  //     }
+  //     setIsLoading(false);
+  //     setShowEditModal(false);
+  //     setPostToEdit(null);
+  //   }
+  // };
 
   const handleDeletePost = async () => {
     if (postToDelete) {
@@ -343,7 +398,110 @@ export default function AdminPage() {
     <div className="admin-container">
       <h1 className="main-heading">Admin Panel</h1>
       {/* Edit Modal */}
+
       {showEditModal && postToEdit && (
+  <div className="modal">
+    <div className="modal-content">
+      <h2 className="form-heading">Edit Post</h2>
+
+      {/* ── title ───────────────────────────────────── */}
+      <label style={{ color: "#48A6A7" }}>Enter post title</label>
+      <input
+        type="text"
+        placeholder="Enter post title"
+        value={postToEdit.title}
+        onChange={(e) =>
+          setPostToEdit({ ...postToEdit, title: e.target.value })
+        }
+      />
+      {editErrors.title && <p className="error">{editErrors.title}</p>}
+
+      {/* ── tagline ─────────────────────────────────── */}
+      <label style={{ color: "#48A6A7" }}>Enter tagline</label>
+      <input
+        type="text"
+        value={postToEdit.tagline}
+        onChange={(e) =>
+          setPostToEdit({ ...postToEdit, tagline: e.target.value })
+        }
+      />
+      {editErrors.tagline && <p className="error">{editErrors.tagline}</p>}
+
+      {/* ── content ─────────────────────────────────── */}
+      <label style={{ color: "#48A6A7" }}>Enter content</label>
+      <textarea
+        value={postToEdit.content}
+        onChange={(e) =>
+          setPostToEdit({ ...postToEdit, content: e.target.value })
+        }
+      />
+      {editErrors.content && <p className="error">{editErrors.content}</p>}
+
+      {/* ── single picker for image OR video ────────── */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*,video/*"
+        onChange={(e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          setPostToEdit({
+            ...postToEdit,
+            image: file.type.startsWith("image") ? file : null,
+            video: file.type.startsWith("video") ? file : null,
+          });
+        }}
+      />
+
+      {/* ── preview section ─────────────────────────── */}
+      {postToEdit.image && typeof postToEdit.image === "string" && (
+        <img src={postToEdit.image} alt="preview" className="blog-image" />
+      )}
+      {postToEdit.video && typeof postToEdit.video === "string" && (
+        <video
+          src={postToEdit.video}
+          controls
+          className="blog-video"
+          style={{ maxWidth: "100%", marginTop: "10px" }}
+        />
+      )}
+
+      {/* ── remove media button ─────────────────────── */}
+      {(postToEdit.image || postToEdit.video) && (
+        <button
+          disabled={isLoading}
+          style={{ margin: "10px 20px" }}
+          className="delete-btn"
+          onClick={() => {
+            setPostToEdit({ ...postToEdit, image: null, video: null });
+            if (fileInputRef.current) fileInputRef.current.value = "";
+          }}
+        >
+          Remove Media
+        </button>
+      )}
+
+      {/* ── action buttons ──────────────────────────── */}
+      <button
+        disabled={isLoading}
+        style={{ marginTop: "20px", marginRight: "20px" }}
+        className="delete-btn"
+        onClick={handleEditPost}
+      >
+        {isLoading ? <span className="loader"></span> : "Save Changes"}
+      </button>
+      <button
+        disabled={isLoading}
+        className="delete-btn"
+        onClick={handleEditCancel}
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+)}
+
+      {/* {showEditModal && postToEdit && (
         <div className="modal">
           <div className="modal-content">
             <h2 className="form-heading">Edit Post</h2>
@@ -417,7 +575,7 @@ export default function AdminPage() {
             </button>
           </div>
         </div>
-      )}
+      )} */}
       {/* Add New Post Form */}
       {open ? (
         <div className="new-post-form">
