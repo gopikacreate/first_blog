@@ -758,13 +758,8 @@ const fetchPosts = async () => {
                           ) : post.video ? (
                             <video
                               src={post.video}
-                               className="post-thumb"
-                              style={{
-                                width: "60px",
-                                height: "60px",
-                                objectFit: "cover",
-                                borderRadius: "6px",
-                              }}
+                             className="edit-video"
+                              
                               muted
                               playsInline
                             />
