@@ -385,7 +385,7 @@ const BlogPosts = () => {
                           </>
                         ) : (
                           <>
-                            <p style={{ marginBottom: "4px" }}>
+                            <p style={{ marginBottom: "4px" ,marginRight:"50px"}}>
                               {comment.text}
                             </p>
                             <small style={{ display: "block", color: "#555" }}>
